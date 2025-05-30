@@ -153,7 +153,7 @@ const Main = () => {
       <Content ref={contentRef}>
         <Title ref={titleRef}>SOLdonald's</Title>
         <Subtitle ref={subtitleRef}>Crypto gastronomy meets fast food</Subtitle>
-        <StartButton to="/game" ref={buttonRef}>Start Trading</StartButton>
+        <StartButton to="/menu" ref={buttonRef}>Start Trading</StartButton>
       </Content>
     </LandingWrapper>
   );
