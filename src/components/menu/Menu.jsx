@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,8 +9,6 @@ import pumpBurger from '../../assets/PumpBurger-art.png';
 import hotDog from '../../assets/hot-dog-art.png';
 import fomoFries from '../../assets/FOMO Fries-art.png';
 import chocolate from "../../assets/chocolate.png";
-import { useNavigate } from 'react-router-dom';
-
 import chocolateCircle from "../../assets/chocolateCircle.png";
 
 // Register GSAP plugins
@@ -184,11 +183,24 @@ const ItemDescription = styled.p`
   line-height: 1.4;
 `;
 
+const ItemStatus = styled.div`
+  color: ${props => props.status === 'accepted' ? '#14F195' : '#FF6B6B'};
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+`;
+
+const ItemTime = styled.div`
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+`;
+
 const ItemPrice = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 `;
 
 const PriceAmount = styled.span`
@@ -197,8 +209,8 @@ const PriceAmount = styled.span`
   color: #14F195;
 `;
 
-const BuyButton = styled.button`
-  background: linear-gradient(90deg, #9945FF, #14F195);
+const ActionButton = styled.button`
+  background: ${props => props.accepted ? 'linear-gradient(90deg, #14F195, #00cc88)' : 'linear-gradient(90deg, #9945FF, #14F195)'};
   border: none;
   color: #000;
   padding: 0.6rem 1.2rem;
@@ -236,49 +248,67 @@ const SolanaLogo = styled.div`
 // Menu data with your imported images
 const menuItems = [
   {
-    name: "PumpBurger",
-    description: "Juicy Solana-themed burger that pumps your hunger away. Comes with rare NFT collectible.",
-    price: "5 $BURGER",
-    image: pumpBurger
+    id: 1,
+    name: "Sol-Burger",
+    description: "Classic burger with Solana twist. Fresh ingredients and fast preparation.",
+    price: "5 $SOL",
+    image: pumpBurger,
+    status: "pending",
+    prepTime: "8-10 min"
   },
   {
-    name: "FOMO Fries",
-    description: "Crispy golden fries that you'll fear missing out on. Limited time only!",
-    price: "3 $BURGER",
-    image: fomoFries
+    id: 2,
+    name: "Crypto Fries",
+    description: "Crispy golden fries with special seasoning. Always in high demand.",
+    price: "3 $SOL",
+    image: fomoFries,
+    status: "pending",
+    prepTime: "5-7 min"
   },
   {
-    name: "Slippage Soda",
-    description: "Refreshing drink that's never the same size twice. Just like your token balances!",
-    price: "2 $BURGER",
-    image: soda
+    id: 3,
+    name: "Blockchain Soda",
+    description: "Refreshing drink with mint flavor. Perfect with any meal.",
+    price: "2 $SOL",
+    image: soda,
+    status: "pending",
+    prepTime: "2 min"
   },
   {
-    name: "Rug Nuggets",
-    description: "Tender chicken nuggets that might disappear when you least expect it.",
-    price: "4 $BURGER",
-    image: hotDog
+    id: 4,
+    name: "Hot Doge",
+    description: "Traditional hot dog with premium sausage. Inspired by crypto meme.",
+    price: "4 $SOL",
+    image: hotDog,
+    status: "pending",
+    prepTime: "6-8 min"
   },
   {
+    id: 5,
     name: "Moon Chocolate",
-    description: "Decadent chocolate that takes you to the moon and back. Diamond hands recommended.",
-    price: "3 $BURGER",
-    image: chocolate
+    description: "Decadent chocolate dessert. To the moon and back in flavor.",
+    price: "3 $SOL",
+    image: chocolate,
+    status: "pending",
+    prepTime: "4-5 min"
   },
   {
-    name: "Whale Circle",
-    description: "Exclusive dessert for the big players. Moves markets with every bite.",
-    price: "6 $BURGER",
-    image: chocolateCircle
+    id: 6,
+    name: "NFT Sundae",
+    description: "Unique ice cream combination. One-of-a-kind taste experience.",
+    price: "6 $SOL",
+    image: chocolateCircle,
+    status: "pending",
+    prepTime: "7-9 min"
   }
 ];
 
-const SolanaGothicCafe = () => {
+const SolDonalds = () => {
   const wrapperRef = useRef(null);
   const particlesRef = useRef([]);
   const menuItemRefs = useRef([]);
   const navigate = useNavigate();
-
+  const [orders, setOrders] = useState(menuItems);
 
   // Create particles
   useEffect(() => {
@@ -340,7 +370,7 @@ const SolanaGothicCafe = () => {
     // Text animation for title
     gsap.to(".cafe-title", {
       duration: 2,
-      text: "Solana Gothic Cafe",
+      text: "Sol-Donalds Kitchen",
       ease: 'none'
     });
 
@@ -363,18 +393,12 @@ const SolanaGothicCafe = () => {
     });
   }, []);
 
-
-
-  // Handle buy button click - navigate to game
-  const handleBuyClick = (item) => {
-    // Animation before navigation
-    gsap.to(".menu-item", {
-      opacity: 0,
-      y: 50,
-      duration: 0.5,
-      stagger: 0.1,
-      onComplete: () => navigate('/game', { state: { purchasedItem: item } })
-    });
+  // Handle order action - navigate to game with selected order
+  const handleOrderAction = (orderId) => {
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      navigate('/game', { state: { order } });
+    }
   };
 
   return (
@@ -398,13 +422,13 @@ const SolanaGothicCafe = () => {
       <CafeContent>
         <Header>
           <CafeTitle className="cafe-title"></CafeTitle>
-          <CafeSubtitle>Where Gothic Aesthetics Meet Solana Fast Food</CafeSubtitle>
+          <CafeSubtitle>Fast Food Orders Management System</CafeSubtitle>
         </Header>
 
         <MenuGrid>
-          {menuItems.map((item, index) => (
+          {orders.map((item, index) => (
             <MenuItem
-              key={item.name}
+              key={item.id}
               ref={el => menuItemRefs.current[index] = el}
               className="menu-item"
             >
@@ -413,22 +437,28 @@ const SolanaGothicCafe = () => {
               </ItemImage>
               <ItemName>{item.name}</ItemName>
               <ItemDescription>{item.description}</ItemDescription>
+              <ItemStatus status={item.status}>
+                Status: {item.status === 'accepted' ? 'Accepted' : 'Pending'}
+              </ItemStatus>
+              <ItemTime>Prep time: {item.prepTime}</ItemTime>
               <ItemPrice>
                 <PriceAmount>{item.price}</PriceAmount>
-                <BuyButton onClick={() => handleBuyClick(item)}>
-                  Buy with SOL
-                </BuyButton>
+                <ActionButton
+                  onClick={() => handleOrderAction(item.id)}
+                >
+                  Prepare Order
+                </ActionButton>
               </ItemPrice>
             </MenuItem>
           ))}
         </MenuGrid>
 
         <Footer>
-          © 2023 Solana Gothic Cafe | Powered by <SolanaLogo>SOLANA</SolanaLogo>
+          © 2023 Sol-Donalds Kitchen | Powered by <SolanaLogo>SOLANA</SolanaLogo>
         </Footer>
       </CafeContent>
     </GothicCafeWrapper>
   );
 };
 
-export default SolanaGothicCafe;
+export default SolDonalds;
