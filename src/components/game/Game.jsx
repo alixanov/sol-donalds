@@ -9,7 +9,6 @@ import {
   Replay as ReplayIcon,
   ArrowBack as ArrowBackIcon,
   CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   Chat as ChatIcon,
   Menu as MenuIcon,
   Close as CloseIcon,
@@ -20,6 +19,24 @@ import polojitelniy from '../../sound/положителный.mp3';
 import pobeda from '../../sound/победа.mp3';
 import otrisatelney from '../../sound/отрицателный.mp3';
 import porajeniya from '../../sound/поражения.mp3';
+
+import bearMeat from "../../assets/bear-meat.png";
+import bullBun from "../../assets/bull-bun.png";
+import bunBottom from "../../assets/bun-bottom.png";
+import bunTop from "../../assets/bun-top.png";
+import bun from "../../assets/bun.png";
+import cheese from "../../assets/cheese.png";
+import chocolate from "../../assets/chocolate.png";
+import fries from "../../assets/fries.png";
+import cup from "../../assets/cup.png";
+import ice from "../../assets/ice.png";
+import ketchup from "../../assets/ketchup.png";
+import lettuce from "../../assets/lettuce.png";
+import mustard from "../../assets/mustard.png";
+import patty from "../../assets/patty.png";
+import salt from "../../assets/salt.png";
+import sauce from "../../assets/sauce.png";
+import wrapper from "../../assets/wrapper.png";
 
 // Import Google Fonts
 const importGoogleFonts = () => {
@@ -65,21 +82,40 @@ const playSound = type => {
   }
 };
 
-// All possible ingredients
+// All possible ingredients (aligned with menuItems from SolDonalds.jsx)
 const allIngredients = [
   'bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top',
   'fries', 'salt', 'ketchup',
   'cup', 'ice', 'soda',
-  'nuggets', 'dip',
+  'bun', 'sausage', 'mustard',
   'chocolate', 'wrapper',
-  'chocolate-circle', 'gold-leaf',
-  'tomato', 'sauce', 'pickle',
-  'nft-sauce', 'bull-bun', 'bear-meat', 'meme-sauce',
-  'chart-lettuce', 'lemon-trading-sauce',
-  'sausage', 'mustard',
+  'bull-bun', 'bear-meat', 'nft-sauce',
 ];
 
-// Recipe definitions (updated to match SolDonalds.jsx menuItems where possible)
+// Image mapping for ingredients
+const ingredientImages = {
+  'bun-bottom': bunBottom,
+  'patty': patty,
+  'cheese': cheese,
+  'lettuce': lettuce,
+  'bun-top': bunTop,
+  'fries': fries,
+  'salt': salt,
+  'ketchup': ketchup,
+  'cup': cup,
+  'ice': ice,
+  'soda': null, // Fallback to emoji
+  'bun': bun,
+  'sausage': null, // Fallback to emoji
+  'mustard': mustard,
+  'chocolate': chocolate,
+  'wrapper': wrapper,
+  'bull-bun': bullBun,
+  'bear-meat': bearMeat,
+  'nft-sauce': sauce, // Using sauce.png as fallback
+};
+
+// Recipe definitions (aligned with menuItems from SolDonalds.jsx)
 const recipes = {
   'Sol-Burger': ['bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top'],
   'Crypto Fries': ['fries', 'salt', 'ketchup'],
@@ -88,7 +124,6 @@ const recipes = {
   'Moon Chocolate': ['chocolate', 'wrapper'],
   'Solana Burger Deluxe': ['bull-bun', 'bear-meat', 'nft-sauce', 'cheese', 'lettuce'],
   'Blockchain Fries': ['fries', 'salt', 'nft-sauce'],
-  'NFT Sundae': ['chocolate-circle', 'gold-leaf', 'meme-sauce'],
 };
 
 // Customer data
@@ -102,7 +137,7 @@ const customers = [
   { id: 7, avatar: '👦', message: 'Blockchain Fries with extra sauce!' },
 ];
 
-// Styled components (unchanged)
+// Styled components
 const GameWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -297,7 +332,7 @@ const OrderIngredients = styled.div`
 `;
 
 const IngredientPill = styled.div`
-  background: ${props => props.added ? 'linear-gradient(135deg, #9150fa 0%, #25dba2 100%)' : '#333'};
+  background: ${props => props.added ? 'linear-gradient(135deg, #9150fa 0%, #25dba2 100%)' : props.required ? '#555' : '#333'};
   color: ${props => props.added ? '#000' : '#fff'};
   padding: 0.2rem 0.5rem;
   border-radius: 15px;
@@ -438,22 +473,43 @@ const IngredientCard = styled.div`
 `;
 
 const IngredientIcon = styled.div`
-  font-size: 2rem;
   margin-bottom: 0.5rem;
   transition: transform 0.2s ease;
+  
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+  
+  span {
+    font-size: 2rem;
+  }
   
   ${IngredientCard}:hover & {
     transform: scale(1.1);
   }
   
   @media (max-width: 768px) {
-    font-size: 1.8rem;
     margin-bottom: 0.4rem;
+    img {
+      width: 36px;
+      height: 36px;
+    }
+    span {
+      font-size: 1.8rem;
+    }
   }
   
   @media (max-width: 480px) {
-    font-size: 1.5rem;
     margin-bottom: 0.3rem;
+    img {
+      width: 32px;
+      height: 32px;
+    }
+    span {
+      font-size: 1.5rem;
+    }
   }
 `;
 
@@ -521,32 +577,25 @@ const GameOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 30;
-  padding: 2rem;
   text-align: center;
-  border: 2px solid transparent;
-  border-image: linear-gradient(135deg, #9150fa 0%, #25dba2 100%) 1;
-  max-width: 500px;
-  margin: 0 auto;
-  border-radius: 12px;
   
   @media (max-width: 768px) {
-    padding: 1rem;
-    max-width: 90%;
+    justify-content: flex-end;
+    padding-bottom: 2rem;
   }
 `;
 
 const GameOverTitle = styled.h2`
   font-family: 'Cinzel Decorative', cursive;
   font-weight: 700;
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: #25dba2;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   letter-spacing: 0.05em;
   
@@ -556,27 +605,6 @@ const GameOverTitle = styled.h2`
   
   @media (max-width: 480px) {
     font-size: 1.5rem;
-  }
-`;
-
-const FinalScore = styled.div`
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  background: linear-gradient(135deg, #9150fa 0%, #25dba2 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  
-  @media (max-width: 768px) {
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
   }
 `;
 
@@ -734,6 +762,7 @@ const Game = () => {
   const [customer, setCustomer] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [lastOrderName, setLastOrderName] = useState(null);
   const notificationRefs = useRef([]);
 
   // Initialize game
@@ -749,6 +778,7 @@ const Game = () => {
       };
       setOrders([initialOrder]);
       setActiveOrder(initialOrder.id);
+      setLastOrderName(initialOrder.name);
       setCustomer(customers[Math.floor(Math.random() * customers.length)]);
       playSound('select');
     } else {
@@ -783,13 +813,16 @@ const Game = () => {
     return () => clearInterval(timer);
   }, [activeOrder, gameOver]);
 
-  // Generate new orders
+  // Generate new orders every 5-6 seconds with non-repeating items
   useEffect(() => {
     if (!activeOrder || gameOver || orders.length >= MAX_ORDERS) return;
 
-    const orderInterval = setInterval(() => {
+    let orderTimeout;
+
+    const generateOrder = () => {
       if (orders.length < MAX_ORDERS) {
-        const menuItems = Object.keys(recipes);
+        const menuItems = Object.keys(recipes).filter(item => item !== lastOrderName);
+        if (menuItems.length === 0) return; // No available items to choose from
         const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
         const newOrder = {
           id: Date.now(),
@@ -800,13 +833,19 @@ const Game = () => {
           ingredientsAdded: [],
         };
         setOrders(prev => [...prev, newOrder]);
+        setLastOrderName(randomItem);
         setCustomer(customers[Math.floor(Math.random() * customers.length)]);
         playSound('success');
       }
-    }, 15000);
+      // Schedule next order
+      clearTimeout(orderTimeout);
+      orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000); // 5-6 seconds
+    };
 
-    return () => clearInterval(orderInterval);
-  }, [activeOrder, gameOver, orders.length]);
+    orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000); // Initial delay
+
+    return () => clearTimeout(orderTimeout);
+  }, [activeOrder, gameOver, orders.length, lastOrderName]);
 
   // Check for expired orders
   useEffect(() => {
@@ -818,7 +857,7 @@ const Game = () => {
           order.timeLeft <= 0 && !order.completed
             ? { ...order, completed: true, failed: true }
             : order,
-        ),
+        )
       );
     }
   }, [orders]);
@@ -883,6 +922,7 @@ const Game = () => {
     setCustomer(null);
     setMobileMenuOpen(false);
     setNotifications([]);
+    setLastOrderName(null);
   };
 
   // Handle ingredient click
@@ -917,17 +957,20 @@ const Game = () => {
 
   // Complete order
   const completeOrder = order => {
-    const updatedOrders = orders.map(o =>
-      o.id === order.id ? { ...o, completed: true } : o,
-    );
-    setOrders(updatedOrders);
+    let updatedOrders;
+    setOrders(prevOrders => {
+      updatedOrders = prevOrders.map(o =>
+        o.id === order.id ? { ...o, completed: true } : o
+      );
+      return updatedOrders;
+    });
     setScore(prev => prev + SCORE_PER_ORDER);
     addNotification(`+${SCORE_PER_ORDER} pts`);
     playSound('complete');
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 3000);
 
-    const nextOrder = updatedOrders.find(o => !o.completed);
+    const nextOrder = updatedOrders?.find(o => !o.completed);
     setActiveOrder(nextOrder?.id || null);
   };
 
@@ -998,9 +1041,7 @@ const Game = () => {
 
       {gameOver && (
         <GameOverlay className="game-over-overlay" role="alert" aria-live="polite">
-          <CancelIcon style={{ fontSize: '3rem', color: '#f72585', marginBottom: '1rem' }} />
           <GameOverTitle>Game Over!</GameOverTitle>
-          <FinalScore>Final Score: {score} pts</FinalScore>
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <ControlButton primary onClick={restartGame}>
               <ReplayIcon />
@@ -1060,21 +1101,6 @@ const Game = () => {
                     </IngredientPill>
                   ))}
                 </OrderIngredients>
-                {order.completed && (
-                  <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {order.failed ? (
-                      <>
-                        <CancelIcon style={{ color: '#f72585', fontSize: '1rem' }} />
-                        <span style={{ color: '#f72585', fontSize: '0.8rem' }}>Failed</span>
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircleIcon style={{ color: '#25dba2', fontSize: '1rem' }} />
-                        <span style={{ color: '#25dba2', fontSize: '0.8rem' }}>Completed</span>
-                      </>
-                    )}
-                  </div>
-                )}
               </OrderCard>
             ))}
           </OrdersColumn>
@@ -1098,7 +1124,7 @@ const Game = () => {
                         style={{
                           margin: '0 0 0.5rem 0',
                           fontSize: '1rem',
-                          fontFamily: "'Cinzel Decorative', 'cursive'",
+                          fontFamily: "'Cinzel Decorative', cursive",
                           fontWeight: '700',
                           letterSpacing: '0.05em',
                           textShadow: '0 1px 2px rgba(0,0,0,0.3)',
@@ -1107,10 +1133,11 @@ const Game = () => {
                         Current: {orders.find(o => o.id === activeOrder)?.name}
                       </h4>
                       <OrderProgress>
-                        {orders.find(o => o.id === activeOrder)?.recipe.map(ing => (
+                        {allIngredients.map(ing => (
                           <IngredientPill
                             key={ing}
                             added={orders.find(o => o.id === activeOrder)?.ingredientsAdded.includes(ing)}
+                            required={orders.find(o => o.id === activeOrder)?.recipe.includes(ing)}
                           >
                             {ing}
                           </IngredientPill>
@@ -1129,22 +1156,15 @@ const Game = () => {
                   {allIngredients.map(ing => (
                     <IngredientCard key={ing} onClick={() => handleIngredientClick(ing)}>
                       <IngredientIcon>
-                        {ing.includes('bun') ? '🍔' :
-                          ing.includes('patty') ? '🍔' :
-                            ing.includes('cheese') ? '🧀' :
-                              ing.includes('lettuce') ? '🥬' :
-                                ing.includes('fries') ? '🍟' :
-                                  ing.includes('soda') ? '🥤' :
-                                    ing.includes('nuggets') ? '🍗' :
-                                      ing.includes('chocolate') ? '🍫' :
-                                        ing.includes('ice') ? '❄️' :
-                                          ing.includes('cup') ? '🥤' :
-                                            ing.includes('sauce') ? '🍖' :
-                                              ing.includes('meat') ? '🥩' :
-                                                ing.includes('sausage') ? '🌭' :
-                                                  ing.includes('mustard') ? '🌭' :
-                                                    ing.includes('ketchup') ? '🍅' :
-                                                      ing.includes('gold') ? '🌟' : '🍴'}
+                        {ingredientImages[ing] ? (
+                          <img src={ingredientImages[ing]} alt={ing} />
+                        ) : (
+                          <span>
+                            {ing === 'soda' ? '🥤' :
+                              ing === 'sausage' ? '🌭' :
+                                ing === 'nft-sauce' ? '🍅' : '🍴'}
+                          </span>
+                        )}
                       </IngredientIcon>
                       <IngredientName>{ing}</IngredientName>
                     </IngredientCard>
