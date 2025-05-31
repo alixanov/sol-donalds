@@ -26,7 +26,7 @@ import bunBottom from "../../assets/bun-bottom.png";
 import bunTop from "../../assets/bun-top.png";
 import bun from "../../assets/bun.png";
 import cheese from "../../assets/cheese.png";
-import chocolate from "../../assets/chocolate.png";
+import chocolate from "../../assets/chocolateee.png";
 import fries from "../../assets/fries.png";
 import cup from "../../assets/cup.png";
 import ice from "../../assets/ice.png";
