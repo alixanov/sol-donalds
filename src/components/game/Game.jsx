@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import gsap from 'gsap';
@@ -6,12 +6,12 @@ import {
   RestaurantMenu as RestaurantMenuIcon,
   Timer as TimerIcon,
   Fastfood as FastfoodIcon,
-  PlayArrow as PlayArrowIcon,
   Replay as ReplayIcon,
   ArrowBack as ArrowBackIcon,
   CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Chat as ChatIcon,
+  ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
 import Confetti from 'react-confetti';
 
@@ -22,7 +22,7 @@ const MAX_ORDERS = 5;
 const SCORE_PER_ORDER = 100;
 const PENALTY_PER_MISTAKE = 20;
 
-// Sound effects (mock implementation)
+// Sound effects
 const playSound = (type) => {
   console.log(`Playing sound: ${type}`);
 };
@@ -47,7 +47,7 @@ const recipes = {
   'Blockchain Soda': ['cup', 'ice', 'soda', 'lemon-trading-sauce'],
   'Hot Doge': ['bull-bun', 'bear-meat', 'sauce', 'pickle'],
   'Moon Chocolate': ['chocolate', 'wrapper', 'gold-leaf'],
-  'NFT Sundae': ['chocolate-circle', 'gold-leaf', 'meme-sauce']
+  'NFT Sundae': ['chocolate-circle', 'gold-leaf', 'meme-sauce'],
 };
 
 // Customer data
@@ -56,7 +56,7 @@ const customers = [
   { id: 2, avatar: '👩', message: 'Crypto Fries with chart lettuce please!' },
   { id: 3, avatar: '🧑', message: 'Blockchain Soda - make it quick!' },
   { id: 4, avatar: '👴', message: 'Hot Doge with all the toppings!' },
-  { id: 5, avatar: '👵', message: 'Moon Chocolate to go please!' }
+  { id: 5, avatar: '👵', message: 'Moon Chocolate to go please!' },
 ];
 
 // Styled components
@@ -67,27 +67,59 @@ const GameWrapper = styled.div`
   background: #1a1a2e;
   color: #fff;
   font-family: 'Arial', sans-serif;
-  overflow: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: 100vh;
+  }
 `;
 
 const GameHeader = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid #333;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
 `;
 
 const GameTitle = styled.h1`
   margin: 0;
   font-size: 1.5rem;
   color: #4cc9f0;
+
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const GameStats = styled.div`
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  border-radius: 8px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  justify-content: center;
+  z-index: 10;
+
+  @media (min-width: 769px) {
+    position: static;
+    background: none;
+  }
 `;
 
 const StatItem = styled.div`
@@ -95,11 +127,22 @@ const StatItem = styled.div`
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
 `;
 
 const GameContent = styled.div`
   display: flex;
+  flex-direction: row;
   height: calc(100vh - 60px);
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+  }
 `;
 
 const OrdersColumn = styled.div`
@@ -108,19 +151,58 @@ const OrdersColumn = styled.div`
   background: rgba(0, 0, 0, 0.3);
   border-right: 1px solid #333;
   overflow-y: auto;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0.5rem;
+    border-right: none;
+    border-bottom: 1px solid #333;
+    max-height: ${props => (props.isOpen ? '50vh' : '50px')};
+    transition: max-height 0.3s ease;
+    overflow: hidden;
+  }
+`;
+
+const OrdersToggle = styled.button`
+  display: none;
+  width: 100%;
+  background: linear-gradient(90deg, #9945ff, #14f195);
+  color: #000;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: 'Arial', sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+
+  &:hover {
+    background: linear-gradient(90deg, #14f195, #9945ff);
+  }
 `;
 
 const OrderCard = styled.div`
-  background: ${props => props.active ? '#2a2a4a' : '#1a1a2e'};
-  border: 1px solid ${props => props.active ? '#4cc9f0' : '#333'};
+  background: ${props => (props.active ? '#2a2a4a' : '#1a1a2e')};
+  border: 1px solid ${props => (props.active ? '#4cc9f0' : '#333')};
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  touch-action: manipulation;
 
   &:hover {
     border-color: #4cc9f0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 `;
 
@@ -129,17 +211,32 @@ const OrderHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
 `;
 
 const OrderTitle = styled.h3`
   margin: 0;
-  color: ${props => props.completed ? '#4cc9f0' : '#fff'};
-  text-decoration: ${props => props.completed ? 'line-through' : 'none'};
+  color: ${props => (props.completed ? '#4cc9f0' : '#fff')};
+  text-decoration: ${props => (props.completed ? 'line-through' : 'none')};
+  font-size: 1.2rem;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 const OrderTime = styled.div`
-  font-size: 0.8rem;
-  color: ${props => props.warning ? '#f72585' : '#ccc'};
+  font-size: 0.9rem;
+  color: ${props => (props.warning ? '#f72585' : '#ccc')};
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
 `;
 
 const OrderIngredients = styled.div`
@@ -150,11 +247,16 @@ const OrderIngredients = styled.div`
 `;
 
 const IngredientPill = styled.div`
-  background: ${props => props.added ? '#4cc9f0' : '#333'};
-  color: ${props => props.added ? '#000' : '#fff'};
+  background: ${props => (props.added ? '#4cc9f0' : '#333')};
+  color: ${props => (props.added ? '#000' : '#fff')};
   padding: 0.3rem 0.6rem;
   border-radius: 20px;
   font-size: 0.8rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+  }
 `;
 
 const WorkArea = styled.div`
@@ -162,6 +264,11 @@ const WorkArea = styled.div`
   padding: 1rem;
   display: flex;
   flex-direction: column;
+  gap: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+  }
 `;
 
 const CurrentOrder = styled.div`
@@ -170,7 +277,11 @@ const CurrentOrder = styled.div`
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  min-height: 150px;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 `;
 
 const CustomerInfo = styled.div`
@@ -178,10 +289,20 @@ const CustomerInfo = styled.div`
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
 `;
 
 const CustomerAvatar = styled.div`
   font-size: 2rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const CustomerMessage = styled.div`
@@ -189,6 +310,13 @@ const CustomerMessage = styled.div`
   padding: 0.5rem 1rem;
   border-radius: 8px;
   flex: 1;
+  font-size: 0.9rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+    width: 100%;
+  }
 `;
 
 const OrderProgress = styled.div`
@@ -198,7 +326,6 @@ const OrderProgress = styled.div`
 `;
 
 const IngredientsArea = styled.div`
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: 1rem;
@@ -206,6 +333,12 @@ const IngredientsArea = styled.div`
   background: rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   overflow-y: auto;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
 `;
 
 const IngredientCard = styled.div`
@@ -219,50 +352,82 @@ const IngredientCard = styled.div`
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 100px;
+  touch-action: manipulation;
 
   &:hover {
     transform: scale(1.05);
     border-color: #4cc9f0;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    min-height: 80px;
   }
 `;
 
 const IngredientIcon = styled.div`
   font-size: 2rem;
   margin-bottom: 0.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
 `;
 
 const IngredientName = styled.div`
   font-size: 0.8rem;
   text-align: center;
+
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
 `;
 
 const GameControls = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.5);
-  border-top: 1px solid #333;
+  background: rgba(0, 0, 0, 0.7);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    justify-content: center;
+    gap: 1rem;
+  }
 `;
 
 const ControlButton = styled.button`
-  background: ${props => props.primary ? '#4cc9f0' : '#333'};
-  color: ${props => props.primary ? '#000' : '#fff'};
+  background: ${props => (props.primary ? '#4cc9f0' : 'linear-gradient(90deg, #9945ff, #14f195)')};
+  color: ${props => (props.primary ? '#000' : '#000')};
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
+  font-size: 1rem;
   transition: all 0.2s ease;
+  min-height: 48px;
+  touch-action: manipulation;
 
   &:hover {
-    background: ${props => props.primary ? '#3aa8d8' : '#444'};
+    background: ${props => (props.primary ? '#3aa8d8' : 'linear-gradient(90deg, #14f195, #9945ff)')};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
 `;
 
 const GameOverlay = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -272,32 +437,50 @@ const GameOverlay = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 20;
 `;
 
 const GameOverTitle = styled.h2`
-  font-size: 3rem;
+  font-size: 2.5rem;
   color: #4cc9f0;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
 `;
 
 const FinalScore = styled.div`
-  font-size: 2rem;
-  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const NoOrderMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    padding: 1rem;
+  }
 `;
 
 const Game = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
   const [score, setScore] = useState(0);
   const [orders, setOrders] = useState([]);
   const [activeOrder, setActiveOrder] = useState(null);
-  const [currentIngredients, setCurrentIngredients] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
   const [customer, setCustomer] = useState(null);
+  const [ordersOpen, setOrdersOpen] = useState(false);
 
   // Initialize game
   useEffect(() => {
@@ -308,17 +491,18 @@ const Game = () => {
         recipe: recipes[location.state.order.name],
         timeLeft: ORDER_PREP_TIME,
         completed: false,
-        ingredientsAdded: []
+        ingredientsAdded: [],
       };
       setOrders([initialOrder]);
       setActiveOrder(initialOrder.id);
       setCustomer(customers[0]);
+      playSound('start');
     }
   }, [location.state]);
 
   // Game timer
   useEffect(() => {
-    if (!gameStarted || gameOver) return;
+    if (!activeOrder || gameOver) return;
 
     const timer = setInterval(() => {
       setTimeLeft(prev => {
@@ -330,21 +514,20 @@ const Game = () => {
         return prev - 1;
       });
 
-      // Update order timers
       setOrders(prevOrders =>
         prevOrders.map(order => ({
           ...order,
-          timeLeft: order.completed ? order.timeLeft : order.timeLeft - 1
-        }))
+          timeLeft: order.completed ? order.timeLeft : order.timeLeft - 1,
+        })),
       );
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [gameStarted, gameOver]);
+  }, [activeOrder, gameOver]);
 
   // Generate new orders
   useEffect(() => {
-    if (!gameStarted || gameOver || orders.length >= MAX_ORDERS) return;
+    if (!activeOrder || gameOver || orders.length >= MAX_ORDERS) return;
 
     const orderInterval = setInterval(() => {
       if (orders.length < MAX_ORDERS) {
@@ -356,55 +539,34 @@ const Game = () => {
           recipe: recipes[randomItem],
           timeLeft: ORDER_PREP_TIME,
           completed: false,
-          ingredientsAdded: []
+          ingredientsAdded: [],
         };
         setOrders(prev => [...prev, newOrder]);
         setCustomer(customers[Math.floor(Math.random() * customers.length)]);
         playSound('new_order');
       }
-    }, 15000); // Every 15 seconds
+    }, 15000);
 
     return () => clearInterval(orderInterval);
-  }, [gameStarted, gameOver, orders.length]);
+  }, [activeOrder, gameOver, orders.length]);
 
   // Check for expired orders
   useEffect(() => {
     const expiredOrders = orders.filter(order => order.timeLeft <= 0 && !order.completed);
     if (expiredOrders.length > 0) {
-      expiredOrders.forEach(order => {
-        playSound('error');
-      });
+      expiredOrders.forEach(() => playSound('error'));
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.timeLeft <= 0 && !order.completed
             ? { ...order, completed: true, failed: true }
-            : order
-        )
+            : order,
+        ),
       );
     }
   }, [orders]);
 
-  // Start game
-  const startGame = () => {
-    setGameStarted(true);
-    playSound('start');
-  };
-
-  // Restart game
-  const restartGame = () => {
-    setGameStarted(false);
-    setGameOver(false);
-    setTimeLeft(GAME_DURATION);
-    setScore(0);
-    setOrders([]);
-    setActiveOrder(null);
-    setCurrentIngredients([]);
-    setShowConfetti(false);
-    setCustomer(null);
-  };
-
   // Handle ingredient click
-  const handleIngredientClick = (ingredient) => {
+  const handleIngredientClick = ingredient => {
     if (!activeOrder || gameOver) return;
 
     const order = orders.find(o => o.id === activeOrder);
@@ -414,15 +576,13 @@ const Game = () => {
     const isAlreadyAdded = order.ingredientsAdded.includes(ingredient);
 
     if (isCorrect && !isAlreadyAdded) {
-      // Add correct ingredient
       const updatedOrders = orders.map(o =>
         o.id === activeOrder
           ? { ...o, ingredientsAdded: [...o.ingredientsAdded, ingredient] }
-          : o
+          : o,
       );
       setOrders(updatedOrders);
 
-      // Check if order is complete
       const updatedOrder = updatedOrders.find(o => o.id === activeOrder);
       if (updatedOrder.ingredientsAdded.length === updatedOrder.recipe.length) {
         completeOrder(updatedOrder);
@@ -430,98 +590,117 @@ const Game = () => {
         playSound('success');
       }
     } else if (!isCorrect) {
-      // Wrong ingredient penalty
       setScore(prev => Math.max(0, prev - PENALTY_PER_MISTAKE));
       playSound('error');
     }
   };
 
   // Complete order
-  const completeOrder = (order) => {
+  const completeOrder = order => {
     const updatedOrders = orders.map(o =>
-      o.id === order.id ? { ...o, completed: true } : o
+      o.id === order.id ? { ...o, completed: true } : o,
     );
     setOrders(updatedOrders);
     setScore(prev => prev + SCORE_PER_ORDER);
     playSound('complete');
     setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
+    setTimeout(() => setShowConfetti(false), 2000);
 
-    // Set next active order
     const nextOrder = updatedOrders.find(o => !o.completed);
     setActiveOrder(nextOrder?.id || null);
   };
 
-  // Select order to work on
-  const selectOrder = (orderId) => {
+  // Select order
+  const selectOrder = orderId => {
     if (gameOver) return;
     setActiveOrder(orderId);
+    setOrdersOpen(false);
+  };
+
+  // Restart game
+  const restartGame = () => {
+    setGameOver(false);
+    setTimeLeft(GAME_DURATION);
+    setScore(0);
+    setOrders([]);
+    setActiveOrder(null);
+    setShowConfetti(false);
+    setCustomer(null);
+    setOrdersOpen(false);
   };
 
   // Format time
-  const formatTime = (seconds) => {
+  const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // Handle no order
+  if (!location.state?.order) {
+    return (
+      <GameWrapper>
+        <GameOverlay>
+          <GameOverTitle>No Order Selected</GameOverTitle>
+          <NoOrderMessage>Please select an order from the menu to start.</NoOrderMessage>
+          <ControlButton
+            primary
+            onClick={() => navigate('/')}
+            aria-label="Back to menu"
+          >
+            <ArrowBackIcon />
+            Back to Menu
+          </ControlButton>
+        </GameOverlay>
+      </GameWrapper>
+    );
+  }
+
   return (
     <GameWrapper>
       <GameHeader>
         <GameTitle>Sol-Donalds Kitchen Rush</GameTitle>
-        <GameStats>
-          <StatItem>
-            <TimerIcon />
-            <span>{formatTime(timeLeft)}</span>
-          </StatItem>
-          <StatItem>
-            <FastfoodIcon />
-            <span>{orders.filter(o => o.completed).length}/{orders.length}</span>
-          </StatItem>
-          <StatItem>
-            <RestaurantMenuIcon />
-            <span>{score} pts</span>
-          </StatItem>
-        </GameStats>
       </GameHeader>
-
-
-
-      {!gameStarted && !gameOver && (
-        <GameOverlay>
-          <GameOverTitle>Sol-Donalds Kitchen</GameOverTitle>
-          <p>Prepare the orders correctly before time runs out!</p>
-          <ControlButton primary onClick={startGame}>
-            <PlayArrowIcon />
-            Start Game
-          </ControlButton>
-        </GameOverlay>
-      )}
 
       {gameOver && (
         <GameOverlay>
           <GameOverTitle>Game Over!</GameOverTitle>
           <FinalScore>Your Score: {score} pts</FinalScore>
-          <ControlButton primary onClick={restartGame}>
+          <ControlButton
+            primary
+            onClick={restartGame}
+            aria-label="Play again"
+          >
             <ReplayIcon />
             Play Again
           </ControlButton>
-          <ControlButton onClick={() => navigate('/')} style={{ marginTop: '1rem' }}>
+          <ControlButton
+            onClick={() => navigate('/')}
+            style={{ marginTop: '1rem' }}
+            aria-label="Back to menu"
+          >
             <ArrowBackIcon />
             Back to Menu
           </ControlButton>
         </GameOverlay>
       )}
 
-      {gameStarted && !gameOver && (
+      {!gameOver && (
         <GameContent>
-          <OrdersColumn>
-            <h3>Orders Queue</h3>
+          <OrdersColumn isOpen={ordersOpen}>
+            <OrdersToggle
+              onClick={() => setOrdersOpen(!ordersOpen)}
+              aria-label={ordersOpen ? 'Hide orders' : 'Show orders'}
+            >
+              Orders Queue
+              <ExpandMoreIcon style={{ transform: ordersOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+            </OrdersToggle>
             {orders.map(order => (
               <OrderCard
                 key={order.id}
                 active={activeOrder === order.id}
                 onClick={() => selectOrder(order.id)}
+                aria-label={`Select order ${order.name}`}
               >
                 <OrderHeader>
                   <OrderTitle completed={order.completed}>{order.name}</OrderTitle>
@@ -589,6 +768,7 @@ const Game = () => {
                     <IngredientCard
                       key={ing}
                       onClick={() => handleIngredientClick(ing)}
+                      aria-label={`Add ${ing} to order`}
                     >
                       <IngredientIcon>
                         {ing.includes('bun') ? '🍞' :
@@ -612,21 +792,11 @@ const Game = () => {
                 </IngredientsArea>
               </>
             ) : (
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                height: '100%',
-                textAlign: 'center',
-                padding: '2rem'
-              }}>
+              <NoOrderMessage>
                 <h3>No Active Orders</h3>
                 <p>Select an order from the queue to start preparing</p>
-                {orders.length === 0 && (
-                  <p>Waiting for new orders to come in...</p>
-                )}
-              </div>
+                {orders.length === 0 && <p>Waiting for new orders to come in...</p>}
+              </NoOrderMessage>
             )}
           </WorkArea>
         </GameContent>
@@ -637,26 +807,43 @@ const Game = () => {
           width={window.innerWidth}
           height={window.innerHeight}
           recycle={false}
-          numberOfPieces={500}
+          numberOfPieces={200}
         />
       )}
 
-      {gameStarted && !gameOver && (
+      {!gameOver && (
         <GameControls>
-          <div>
-            <ControlButton onClick={() => navigate('/')}>
-              <ArrowBackIcon />
-              Exit Game
-            </ControlButton>
-          </div>
-          <div>
-            <ControlButton onClick={restartGame}>
-              <ReplayIcon />
-              Restart
-            </ControlButton>
-          </div>
+          <ControlButton
+            onClick={() => navigate('/')}
+            aria-label="Exit game"
+          >
+            <ArrowBackIcon />
+            Exit
+          </ControlButton>
+          <ControlButton
+            onClick={restartGame}
+            aria-label="Restart game"
+          >
+            <ReplayIcon />
+            Restart
+          </ControlButton>
         </GameControls>
       )}
+
+      <GameStats>
+        <StatItem>
+          <TimerIcon />
+          <span>{formatTime(timeLeft)}</span>
+        </StatItem>
+        <StatItem>
+          <FastfoodIcon />
+          <span>{orders.filter(o => o.completed).length}/{orders.length}</span>
+        </StatItem>
+        <StatItem>
+          <RestaurantMenuIcon />
+          <span>{score} pts</span>
+        </StatItem>
+      </GameStats>
     </GameWrapper>
   );
 };
