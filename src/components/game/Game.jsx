@@ -815,14 +815,14 @@ const Game = () => {
 
   // Generate new orders every 5-6 seconds with non-repeating items
   useEffect(() => {
-    if (!activeOrder || gameOver || orders.length >= MAX_ORDERS) return;
+    if (gameOver || orders.length >= MAX_ORDERS) return;
 
     let orderTimeout;
 
     const generateOrder = () => {
       if (orders.length < MAX_ORDERS) {
         const menuItems = Object.keys(recipes).filter(item => item !== lastOrderName);
-        if (menuItems.length === 0) return; // No available items to choose from
+        if (menuItems.length === 0) return;
         const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
         const newOrder = {
           id: Date.now(),
@@ -835,17 +835,19 @@ const Game = () => {
         setOrders(prev => [...prev, newOrder]);
         setLastOrderName(randomItem);
         setCustomer(customers[Math.floor(Math.random() * customers.length)]);
+        if (!activeOrder) {
+          setActiveOrder(newOrder.id);
+        }
         playSound('success');
       }
-      // Schedule next order
       clearTimeout(orderTimeout);
-      orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000); // 5-6 seconds
+      orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000);
     };
 
-    orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000); // Initial delay
+    orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000);
 
     return () => clearTimeout(orderTimeout);
-  }, [activeOrder, gameOver, orders.length, lastOrderName]);
+  }, [gameOver, orders.length, lastOrderName, activeOrder]);
 
   // Check for expired orders
   useEffect(() => {
