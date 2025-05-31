@@ -76,28 +76,33 @@ const allIngredients = [
   'tomato', 'sauce', 'pickle',
   'nft-sauce', 'bull-bun', 'bear-meat', 'meme-sauce',
   'chart-lettuce', 'lemon-trading-sauce',
+  'sausage', 'mustard',
 ];
 
-// Recipe definitions
+// Recipe definitions (updated to match SolDonalds.jsx menuItems where possible)
 const recipes = {
-  'Sol-Burger': ['bull-bun', 'patty', 'cheese', 'lettuce', 'nft-sauce', 'bull-bun'],
-  'Crypto Fries': ['fries', 'salt', 'chart-lettuce'],
-  'Blockchain Soda': ['cup', 'ice', 'soda', 'lemon-trading-sauce'],
-  'Hot Doge': ['bull-bun', 'bear-meat', 'sauce', 'pickle'],
-  'Moon Chocolate': ['chocolate', 'wrapper', 'gold-leaf'],
+  'Sol-Burger': ['bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top'],
+  'Crypto Fries': ['fries', 'salt', 'ketchup'],
+  'Blockchain Soda': ['cup', 'ice', 'soda'],
+  'Hot Doge': ['bun', 'sausage', 'ketchup', 'mustard'],
+  'Moon Chocolate': ['chocolate', 'wrapper'],
+  'Solana Burger Deluxe': ['bull-bun', 'bear-meat', 'nft-sauce', 'cheese', 'lettuce'],
+  'Blockchain Fries': ['fries', 'salt', 'nft-sauce'],
   'NFT Sundae': ['chocolate-circle', 'gold-leaf', 'meme-sauce'],
 };
 
 // Customer data
 const customers = [
-  { id: 1, avatar: '👨', message: 'I need a Sol-Burger with extra NFT sauce!' },
-  { id: 2, avatar: '👩', message: 'Crypto Fries with chart lettuce please!' },
+  { id: 1, avatar: '👨', message: 'I need a Sol-Burger with extra sauce!' },
+  { id: 2, avatar: '👩', message: 'Crypto Fries with ketchup please!' },
   { id: 3, avatar: '🧑', message: 'Blockchain Soda - make it quick!' },
   { id: 4, avatar: '👴', message: 'Hot Doge with all the toppings!' },
   { id: 5, avatar: '👵', message: 'Moon Chocolate to go please!' },
+  { id: 6, avatar: '🧒', message: 'Solana Burger Deluxe, stat!' },
+  { id: 7, avatar: '👦', message: 'Blockchain Fries with extra sauce!' },
 ];
 
-// Styled components with mobile adaptation
+// Styled components (unchanged)
 const GameWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -733,11 +738,11 @@ const Game = () => {
 
   // Initialize game
   useEffect(() => {
-    if (location.state?.order) {
+    if (location.state?.order && Array.isArray(location.state.order.ingredients) && location.state.order.ingredients.length > 0) {
       const initialOrder = {
         id: Date.now(),
         name: location.state.order.name,
-        recipe: recipes[location.state.order.name],
+        recipe: location.state.order.ingredients,
         timeLeft: ORDER_PREP_TIME,
         completed: false,
         ingredientsAdded: [],
@@ -746,6 +751,9 @@ const Game = () => {
       setActiveOrder(initialOrder.id);
       setCustomer(customers[Math.floor(Math.random() * customers.length)]);
       playSound('select');
+    } else {
+      setOrders([]);
+      setActiveOrder(null);
     }
   }, [location.state]);
 
@@ -786,7 +794,7 @@ const Game = () => {
         const newOrder = {
           id: Date.now(),
           name: randomItem,
-          recipe: recipes[randomItem],
+          recipe: recipes[randomItem] || [],
           timeLeft: ORDER_PREP_TIME,
           completed: false,
           ingredientsAdded: [],
@@ -849,6 +857,14 @@ const Game = () => {
       );
     }
   }, [gameOver]);
+
+  // Validate activeOrder
+  useEffect(() => {
+    if (activeOrder && !orders.find(o => o.id === activeOrder)) {
+      const nextOrder = orders.find(o => !o.completed);
+      setActiveOrder(nextOrder?.id || null);
+    }
+  }, [orders, activeOrder]);
 
   // Add notification
   const addNotification = message => {
@@ -937,12 +953,12 @@ const Game = () => {
   };
 
   // Handle no order
-  if (!location.state?.order) {
+  if (!location.state?.order || !Array.isArray(location.state.order.ingredients) || location.state.order.ingredients.length === 0) {
     return (
       <GameWrapper>
         <NoOrderOverlay>
-          <h2>No Order Selected</h2>
-          <p>Please select an order from the menu to start.</p>
+          <h2>No Valid Order Selected</h2>
+          <p>Please select a valid order from the menu to start.</p>
           <ControlButton primary onClick={() => navigate('/')}>
             <ArrowBackIcon />
             Back to Menu
@@ -1076,28 +1092,37 @@ const Game = () => {
                       </CustomerMessage>
                     </CustomerInfo>
                   )}
-                  <h4
-                    style={{
-                      margin: '0 0 0.5rem 0',
-                      fontSize: '1rem',
-                      fontFamily: "'Cinzel Decorative', 'cursive'",
-                      fontWeight: '700',
-                      letterSpacing: '0.05em',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                    }}
-                  >
-                    Current: {orders.find(o => o.id === activeOrder)?.name}
-                  </h4>
-                  <OrderProgress>
-                    {orders.find(o => o.id === activeOrder)?.recipe.map(ing => (
-                      <IngredientPill
-                        key={ing}
-                        added={orders.find(o => o.id === activeOrder)?.ingredientsAdded.includes(ing)}
+                  {orders.find(o => o.id === activeOrder) ? (
+                    <>
+                      <h4
+                        style={{
+                          margin: '0 0 0.5rem 0',
+                          fontSize: '1rem',
+                          fontFamily: "'Cinzel Decorative', 'cursive'",
+                          fontWeight: '700',
+                          letterSpacing: '0.05em',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                        }}
                       >
-                        {ing}
-                      </IngredientPill>
-                    ))}
-                  </OrderProgress>
+                        Current: {orders.find(o => o.id === activeOrder)?.name}
+                      </h4>
+                      <OrderProgress>
+                        {orders.find(o => o.id === activeOrder)?.recipe.map(ing => (
+                          <IngredientPill
+                            key={ing}
+                            added={orders.find(o => o.id === activeOrder)?.ingredientsAdded.includes(ing)}
+                          >
+                            {ing}
+                          </IngredientPill>
+                        ))}
+                      </OrderProgress>
+                    </>
+                  ) : (
+                    <NoOrdersMessage>
+                      <h3>Order Not Found</h3>
+                      <p>Please select another order from the queue.</p>
+                    </NoOrdersMessage>
+                  )}
                 </CurrentOrder>
 
                 <IngredientsArea>
@@ -1116,7 +1141,10 @@ const Game = () => {
                                           ing.includes('cup') ? '🥤' :
                                             ing.includes('sauce') ? '🍖' :
                                               ing.includes('meat') ? '🥩' :
-                                                ing.includes('gold') ? '🌟' : '🍴'}
+                                                ing.includes('sausage') ? '🌭' :
+                                                  ing.includes('mustard') ? '🌭' :
+                                                    ing.includes('ketchup') ? '🍅' :
+                                                      ing.includes('gold') ? '🌟' : '🍴'}
                       </IngredientIcon>
                       <IngredientName>{ing}</IngredientName>
                     </IngredientCard>
