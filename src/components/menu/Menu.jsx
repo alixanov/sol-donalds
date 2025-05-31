@@ -21,7 +21,7 @@ const GothicCafeWrapper = styled.div`
   min-height: 100vh;
   background: #0a0a0a;
   overflow: hidden;
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: 'Cinzel Decorative', 'Times New Roman', cursive;
   color: #e0e0e0;
 
   &::before {
@@ -121,11 +121,29 @@ const MenuGrid = styled.div`
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
   margin: 3rem 0;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+
+  &.loaded {
+    opacity: 1;
+  }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
     gap: 1rem;
     margin: 1.5rem 0;
+  }
+`;
+
+const LoadingPlaceholder = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: #aaa;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
   }
 `;
 
@@ -135,8 +153,6 @@ const MenuItem = styled.div`
   border-radius: 10px;
   padding: 1.5rem;
   transition: all 0.3s ease;
-  opacity: 1; /* Изменено с 0 на 1 для немедленного отображения */
-  transform: translateY(0); /* Изменено для немедленного отображения */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
@@ -213,6 +229,7 @@ const ItemName = styled.h3`
   font-size: 1.5rem;
   margin: 0 0 0.5rem;
   color: #e0e0e0;
+  font-family: 'Cinzel Decorative', cursive;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
@@ -224,6 +241,7 @@ const ItemDescription = styled.p`
   margin: 0 0 1rem;
   font-size: 0.9rem;
   line-height: 1.4;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -238,6 +256,7 @@ const ItemStatus = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -248,6 +267,7 @@ const ItemTime = styled.div`
   color: #aaa;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -271,6 +291,7 @@ const PriceAmount = styled.span`
   font-size: 1.3rem;
   font-weight: bold;
   color: #14f195;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     font-size: 1.1rem;
@@ -311,6 +332,7 @@ const Footer = styled.footer`
   border-top: 1px solid #333;
   color: #666;
   font-size: 0.9rem;
+  font-family: 'Roboto', sans-serif;
 
   @media (max-width: 768px) {
     padding: 1rem 0;
@@ -326,9 +348,10 @@ const SolanaLogo = styled.div`
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  font-family: 'Roboto', sans-serif;
 `;
 
-// Menu data
+// Menu data with ingredients
 const menuItems = [
   {
     id: 1,
@@ -338,6 +361,7 @@ const menuItems = [
     image: pumpBurger,
     status: 'pending',
     prepTime: '8-10 min',
+    ingredients: ['bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top'],
   },
   {
     id: 2,
@@ -347,6 +371,7 @@ const menuItems = [
     image: fomoFries,
     status: 'pending',
     prepTime: '5-7 min',
+    ingredients: ['fries', 'salt', 'ketchup'],
   },
   {
     id: 3,
@@ -356,6 +381,7 @@ const menuItems = [
     image: soda,
     status: 'pending',
     prepTime: '2 min',
+    ingredients: ['cup', 'ice', 'soda'],
   },
   {
     id: 4,
@@ -365,6 +391,7 @@ const menuItems = [
     image: hotDog,
     status: 'pending',
     prepTime: '6-8 min',
+    ingredients: ['bun', 'sausage', 'ketchup', 'mustard'],
   },
   {
     id: 5,
@@ -374,6 +401,7 @@ const menuItems = [
     image: chocolate,
     status: 'pending',
     prepTime: '4-5 min',
+    ingredients: ['chocolate', 'wrapper'],
   },
   {
     id: 7,
@@ -383,51 +411,65 @@ const menuItems = [
     image: solanaBurgerImage,
     status: 'pending',
     prepTime: '10-12 min',
+    ingredients: ['bull-bun', 'bear-meat', 'nft-sauce', 'cheese', 'lettuce'],
   },
   {
     id: 8,
     name: 'Blockchain Fries',
-    description: 'Crispy golden fries with a touch of Solana-powered flavor. A next-gen snack.',
+    description: 'Crispy golden fries with a touch of Solana-powered flavor.',
     price: '5 $SOL',
     image: chocolateCircle,
     status: 'pending',
     prepTime: '6-8 min',
+    ingredients: ['fries', 'salt', 'nft-sauce'],
   },
 ];
 
+// Initialize orders with random locked status
+const initializeOrders = () => {
+  const numLocked = Math.floor(Math.random() * 3); // 0, 1, or 2
+  const shuffledIds = [...menuItems].sort(() => Math.random() - 0.5).map(item => item.id);
+  const lockedIds = shuffledIds.slice(0, numLocked);
+
+  return menuItems.map(item => ({
+    ...item,
+    status: lockedIds.includes(item.id) ? 'locked' : 'pending',
+  }));
+};
+
 const SolDonalds = () => {
   const wrapperRef = useRef(null);
-  const particlesRef = useRef([]);
+  // Исправление: инициализируем массив правильно
   const menuItemRefs = useRef([]);
+  const particlesRef = useRef([]);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Initialize orders with random locked status
+  // Инициализация заказов после монтирования компонента
   useEffect(() => {
-    // Randomly select 0-2 orders to lock
-    const numLocked = Math.floor(Math.random() * 3); // 0, 1, or 2
-    const shuffledIds = [...menuItems].sort(() => Math.random() - 0.5).map(item => item.id);
-    const lockedIds = shuffledIds.slice(0, numLocked);
-
-    const initialOrders = menuItems.map(item => ({
-      ...item,
-      status: lockedIds.includes(item.id) ? 'locked' : 'pending',
-    }));
-
-    setOrders(initialOrders);
+    try {
+      const initialOrders = initializeOrders();
+      setOrders(initialOrders);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Error initializing orders:', error);
+      setOrders([]);
+      setIsLoaded(true);
+    }
   }, []);
 
   // Create particles
   useEffect(() => {
     const particles = [];
-    const colors = ['#9945ff', '#14f195', '#00ffaa', '#ff00ff', '#ffff00'];
+    const colors = ['#9945ff', '#14f195', '#00ffaa', '#ff00ff'];
 
     for (let i = 0; i < 50; i++) {
       particles.push({
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        size: Math.random() * 5 + 1,
+        size: Math.random() * 5 + 0.5,
         color: colors[Math.floor(Math.random() * colors.length)],
         duration: Math.random() * 10 + 5,
         delay: Math.random() * 5,
@@ -435,11 +477,16 @@ const SolDonalds = () => {
     }
 
     particlesRef.current = particles;
+
+    return () => {
+      particlesRef.current = [];
+    };
   }, []);
 
   // GSAP Animations
   useEffect(() => {
-    // Проверяем, что элементы существуют перед анимацией
+    if (!isLoaded) return;
+
     if (wrapperRef.current) {
       gsap.to(wrapperRef.current, {
         backgroundPosition: '50% 100%',
@@ -452,28 +499,27 @@ const SolDonalds = () => {
       });
     }
 
-    // Анимация частиц
-    particlesRef.current.forEach(particle => {
-      const particleElement = document.querySelector(`.particle-${particle.id}`);
-      if (particleElement) {
-        gsap.to(particleElement, {
-          x: `${Math.random() * 100 - 50}%`,
-          y: `${Math.random() * 100 - 50}%`,
-          duration: particle.duration,
-          delay: particle.delay,
-          ease: 'sine.inOut',
-          repeat: -1,
-          yoyo: true,
-        });
-      }
-    });
+    // Animate particles
+    if (Array.isArray(particlesRef.current)) {
+      particlesRef.current.forEach(particle => {
+        const particleElement = document.querySelector(`.particle-${particle.id}`);
+        if (particleElement) {
+          gsap.to(particleElement, {
+            x: `${Math.random() * 100 - 50}%`,
+            y: `${Math.random() * 100 - 50}%`,
+            duration: particle.duration,
+            delay: particle.delay,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+          });
+        }
+      });
+    }
 
-    // Анимация для заголовка
+    // Animate title
     const titleElement = document.querySelector('.cafe-title');
     if (titleElement) {
-      // Устанавливаем начальный текст
-      titleElement.textContent = 'Sol-Donalds Kitchen';
-      
       gsap.to(titleElement, {
         y: -10,
         duration: 3,
@@ -491,42 +537,55 @@ const SolDonalds = () => {
       });
     }
 
-    // Анимация карточек меню - с задержкой для появления
-    const validMenuItems = menuItemRefs.current.filter(item => item !== null);
-    if (validMenuItems.length > 0) {
-      // Сначала скрываем все элементы
-      gsap.set(validMenuItems, { opacity: 0, y: 50 });
-      
-      // Затем показываем их с анимацией
-      validMenuItems.forEach((item, index) => {
-        gsap.to(item, {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          delay: index * 0.1,
-          ease: 'back.out',
-        });
-      });
+    // Исправление: проверяем что menuItemRefs.current существует и это массив
+    if (menuItemRefs.current && Array.isArray(menuItemRefs.current)) {
+      const validMenuItems = menuItemRefs.current.filter(item => item !== null && item !== undefined);
+      if (validMenuItems.length > 0) {
+        gsap.fromTo(
+          validMenuItems,
+          { opacity: 0, y: 50 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'back.out(1.7)',
+          }
+        );
+      }
     }
-  }, [orders]); // Добавляем orders в зависимости для перезапуска анимации
+  }, [isLoaded, orders]);
 
   // Handle order action
-  const handleOrderAction = orderId => {
-    const order = orders.find(o => o.id === orderId);
-    if (order && order.status !== 'locked') {
-      setOrders(prev =>
-        prev.map(o =>
-          o.id === orderId ? { ...o, status: 'accepted' } : o,
-        ),
-      );
-      navigate('/game', { state: { order } });
+  const handleOrderAction = (orderId) => {
+    try {
+      if (!Array.isArray(orders)) {
+        console.error('Orders is not an array:', orders);
+        return;
+      }
+
+      const order = orders.find(o => o && o.id === orderId);
+      if (order && order.status !== 'locked') {
+        setOrders(prev => {
+          if (!Array.isArray(prev)) return [];
+          return prev.map(o =>
+            o && o.id === orderId ? { ...o, status: 'accepted' } : o,
+          );
+        });
+        navigate('/game', { state: { order } });
+      }
+    } catch (error) {
+      console.error('Error handling order action:', error);
     }
   };
+
+  // Проверяем что orders это массив перед рендерингом
+  const safeOrders = Array.isArray(orders) ? orders : [];
 
   return (
     <GothicCafeWrapper ref={wrapperRef}>
       <SolanaParticles>
-        {particlesRef.current.map(particle => (
+        {Array.isArray(particlesRef.current) && particlesRef.current.map(particle => (
           <Particle
             key={particle.id}
             className={`particle-${particle.id}`}
@@ -547,41 +606,59 @@ const SolDonalds = () => {
           <CafeSubtitle>Fast Food Orders Management System</CafeSubtitle>
         </Header>
 
-        <MenuGrid>
-          {orders.map((item, index) => (
-            <MenuItem
-              key={item.id}
-              ref={el => {
-                if (el) menuItemRefs.current[index] = el;
-              }}
-              className="menu-item"
-              locked={item.status === 'locked'}
-            >
-              <ItemImage>
-                <img src={item.image} alt={item.name} />
-              </ItemImage>
-              <ItemName>{item.name}</ItemName>
-              <ItemDescription>{item.description}</ItemDescription>
-              <ItemStatus status={item.status}>
-                {item.status === 'locked' && <LockIcon sx={{ fontSize: 16 }} />}
-                Status: {item.status === 'accepted' ? 'Accepted' : item.status === 'locked' ? 'Locked by Another Chef' : 'Pending'}
-              </ItemStatus>
-              <ItemTime>Prep time: {item.prepTime}</ItemTime>
-              <ItemPrice>
-                <PriceAmount>{item.price}</PriceAmount>
-                <ActionButton
-                  onClick={() => handleOrderAction(item.id)}
+        {!isLoaded ? (
+          <LoadingPlaceholder aria-busy="true">
+            Loading menu...
+          </LoadingPlaceholder>
+        ) : safeOrders.length === 0 ? (
+          <LoadingPlaceholder>
+            No orders available at the moment.
+          </LoadingPlaceholder>
+        ) : (
+          <MenuGrid className={isLoaded ? 'loaded' : ''}>
+            {safeOrders.map((item, index) => {
+              // Дополнительная проверка что item существует
+              if (!item || !item.id) return null;
+
+              return (
+                <MenuItem
+                  key={item.id}
+                  ref={el => {
+                    // Исправление: безопасное присваивание ref
+                    if (menuItemRefs.current && Array.isArray(menuItemRefs.current)) {
+                      menuItemRefs.current[index] = el;
+                    }
+                  }}
+                  className="menu-item"
                   locked={item.status === 'locked'}
-                  accepted={item.status === 'accepted'}
-                  disabled={item.status === 'locked'}
-                  aria-label={item.status === 'locked' ? 'Order locked by another chef' : `Prepare ${item.name}`}
                 >
-                  {item.status === 'locked' ? 'Locked' : 'Prepare Order'}
-                </ActionButton>
-              </ItemPrice>
-            </MenuItem>
-          ))}
-        </MenuGrid>
+                  <ItemImage>
+                    <img src={item.image} alt={item.name || 'Menu item'} />
+                  </ItemImage>
+                  <ItemName>{item.name || 'Unknown Item'}</ItemName>
+                  <ItemDescription>{item.description || 'No description available'}</ItemDescription>
+                  <ItemStatus status={item.status}>
+                    {item.status === 'locked' && <LockIcon sx={{ fontSize: 16 }} />}
+                    Status: {item.status === 'accepted' ? 'Accepted' : item.status === 'locked' ? 'Locked by Another Chef' : 'Pending'}
+                  </ItemStatus>
+                  <ItemTime>Prep time: {item.prepTime || 'Unknown'}</ItemTime>
+                  <ItemPrice>
+                    <PriceAmount>{item.price || '0 $SOL'}</PriceAmount>
+                    <ActionButton
+                      onClick={() => handleOrderAction(item.id)}
+                      locked={item.status === 'locked'}
+                      accepted={item.status === 'accepted'}
+                      disabled={item.status === 'locked'}
+                      aria-label={item.status === 'locked' ? 'Order locked by another chef' : `Prepare ${item.name}`}
+                    >
+                      {item.status === 'locked' ? 'Locked' : 'Prepare Order'}
+                    </ActionButton>
+                  </ItemPrice>
+                </MenuItem>
+              );
+            })}
+          </MenuGrid>
+        )}
 
         <Footer>
           © 2025 Sol-Donalds Kitchen | Powered by <SolanaLogo>SOLANA</SolanaLogo>
