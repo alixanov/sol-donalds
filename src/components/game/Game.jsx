@@ -19,14 +19,13 @@ import polojitelniy from '../../sound/положителный.mp3';
 import pobeda from '../../sound/победа.mp3';
 import otrisatelney from '../../sound/отрицателный.mp3';
 import porajeniya from '../../sound/поражения.mp3';
-
-import bearMeat from "../../assets/bear-meat.png";
-import bullBun from "../../assets/bull-bun.png";
 import bunBottom from "../../assets/bun-bottom.png";
+import bearMeat from "../../assets/bear-meat.png";
+import bullBun from "../../assets/bul-bunn.png";
 import bunTop from "../../assets/bun-top.png";
 import bun from "../../assets/bun.png";
 import cheese from "../../assets/cheese.png";
-import chocolate from "../../assets/chocolateee.png";
+import chocolate from "../../assets/chocolate.png";
 import fries from "../../assets/fries.png";
 import cup from "../../assets/cup.png";
 import ice from "../../assets/ice.png";
@@ -35,17 +34,8 @@ import lettuce from "../../assets/lettuce.png";
 import mustard from "../../assets/mustard.png";
 import patty from "../../assets/patty.png";
 import salt from "../../assets/salt.png";
-import sauce from "../../assets/sauce.png";
+import sauce from "../../assets/nft-sauce.png";
 import wrapper from "../../assets/wrapper.png";
-
-// Import Google Fonts
-const importGoogleFonts = () => {
-  const link = document.createElement('link');
-  link.href = 'https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Roboto:wght@400;500&display=swap';
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
-};
-importGoogleFonts();
 
 // Game constants
 const GAME_DURATION = 120; // 2 minutes
@@ -82,7 +72,7 @@ const playSound = type => {
   }
 };
 
-// All possible ingredients (aligned with menuItems from SolDonalds.jsx)
+// All possible ingredients
 const allIngredients = [
   'bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top',
   'fries', 'salt', 'ketchup',
@@ -104,18 +94,18 @@ const ingredientImages = {
   'ketchup': ketchup,
   'cup': cup,
   'ice': ice,
-  'soda': null, // Fallback to emoji
+  'soda': null,
   'bun': bun,
-  'sausage': null, // Fallback to emoji
+  'sausage': null,
   'mustard': mustard,
   'chocolate': chocolate,
   'wrapper': wrapper,
   'bull-bun': bullBun,
   'bear-meat': bearMeat,
-  'nft-sauce': sauce, // Using sauce.png as fallback
+  'nft-sauce': sauce,
 };
 
-// Recipe definitions (aligned with menuItems from SolDonalds.jsx)
+// Recipe definitions
 const recipes = {
   'Sol-Burger': ['bun-bottom', 'patty', 'cheese', 'lettuce', 'bun-top'],
   'Crypto Fries': ['fries', 'salt', 'ketchup'],
@@ -139,6 +129,7 @@ const customers = [
 
 // Styled components
 const GameWrapper = styled.div`
+  @import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&family=UnifrakturMaguntia&display=swap');
   position: relative;
   width: 100%;
   height: 100vh;
@@ -165,7 +156,7 @@ const GameHeader = styled.header`
 
 const GameTitle = styled.h1`
   margin: 0;
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: 'Tektur', sans-serif;
   font-weight: 700;
   font-size: 1.5rem;
   color: #25dba2;
@@ -195,7 +186,7 @@ const StatItem = styled.div`
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
   
@@ -212,7 +203,7 @@ const MobileMenuToggle = styled.button`
   padding: 0.5rem;
   border-radius: 4px;
   cursor: pointer;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 500;
   
   @media (max-width: 768px) {
@@ -266,7 +257,7 @@ const MobileOrdersHeader = styled.div`
     
     h3 {
       margin: 0;
-      font-family: 'Cinzel Decorative', cursive;
+      font-family: 'Tektur', sans-serif;
       font-weight: 700;
       color: #25dba2;
       letter-spacing: 0.05em;
@@ -304,7 +295,7 @@ const OrderHeader = styled.div`
 
 const OrderTitle = styled.h3`
   margin: 0;
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: 'Tektur', sans-serif;
   font-weight: 700;
   color: ${props => props.completed ? '#25dba2' : '#fff'};
   text-decoration: ${props => props.completed ? 'line-through' : 'none'};
@@ -318,7 +309,7 @@ const OrderTitle = styled.h3`
 `;
 
 const OrderTime = styled.div`
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 500;
   font-size: 0.8rem;
   color: ${props => props.warning ? '#f72585' : '#ccc'};
@@ -336,7 +327,7 @@ const IngredientPill = styled.div`
   color: ${props => props.added ? '#000' : '#fff'};
   padding: 0.2rem 0.5rem;
   border-radius: 15px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 500;
   font-size: 0.7rem;
   
@@ -397,7 +388,7 @@ const CustomerMessage = styled.div`
   padding: 0.5rem 1rem;
   border-radius: 8px;
   flex: 1;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 400;
   font-size: 0.9rem;
   
@@ -416,7 +407,7 @@ const OrderProgress = styled.div`
 const IngredientsArea = styled.div`
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 1rem;
   padding: 1.5rem;
   background: rgba(0, 0, 0, 0.2);
@@ -437,53 +428,85 @@ const IngredientsArea = styled.div`
 `;
 
 const IngredientCard = styled.div`
-  background: linear-gradient(135deg, rgba(145, 80, 250, 0.2) 0%, rgba(37, 219, 162, 0.2) 100%);
-  border: 1px solid rgba(145, 80, 250, 0.5);
-  border-radius: 12px;
-  padding: 1rem;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2e1a3e 100%);
+  border: 3px solid #c0c0c0;
+  border-radius: 8px;
+  padding: 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   touch-action: manipulation;
-  min-height: 100px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(5px);
+  box-shadow: 0 4px 12px rgba(145, 80, 250, 0.3);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Tektur', sans-serif;
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      to bottom,
+      rgba(145, 80, 250, 0.2) 0%,
+      transparent 50%,
+      rgba(145, 80, 250, 0.2) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &::after {
+    content: '';
+    position: calc(100% - 2px);
+    width: 8px;
+    height: #c0c0c0;
+    border-radius: 2px;
+  }
   &:hover, &:active {
     transform: scale(1.05);
-    border-color: #25dba2;
-    background: linear-gradient(135deg, rgba(145, 80, 250, 0.3) 0%, rgba(37, 219, 162, 0.3) 100%);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    border-color: #9150fa;
+    box-shadow: 0 6px 15px rgba(145, 80, 250, 0.7);
+    &::before {
+      opacity: 1;
+    }
   }
   
   @media (max-width: 768px) {
-    padding: 0.8rem;
-    min-height: 80px;
-    border-radius: 10px;
+    width: 80px;
+    height: 80px;
+    padding: 0.4rem;
+    border-width: 2px;
+    border-radius: 6px;
   }
   
   @media (max-width: 480px) {
-    padding: 0.6rem;
-    min-height: 70px;
-    border-radius: 8px;
+    width: 70px;
+    height: 70px;
+    padding: 0.3rem;
+    border-radius: 5px;
   }
 `;
 
 const IngredientIcon = styled.div`
-  margin-bottom: 0.5rem;
-  transition: transform 0.2s ease;
+  margin-bottom: 0.3rem;
+  transition: transform 0.3s ease;
   
   img {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
   }
   
   span {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   ${IngredientCard}:hover & {
@@ -491,38 +514,39 @@ const IngredientIcon = styled.div`
   }
   
   @media (max-width: 768px) {
-    margin-bottom: 0.4rem;
-    img {
-      width: 36px;
-      height: 36px;
-    }
-    span {
-      font-size: 1.8rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.2rem;
     img {
       width: 32px;
       height: 32px;
     }
     span {
-      font-size: 1.5rem;
+      font-size: 1.6rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    margin-bottom: 0.1rem;
+    img {
+      width: 28px;
+      height: 28px;
+    }
+    span {
+      font-size: 1.4rem;
     }
   }
 `;
 
 const IngredientName = styled.div`
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-  font-size: 0.8rem;
+  font-family: 'Tektur', sans-serif;
+  font-weight: 400;
+  font-size: 0.7rem;
   text-align: center;
-  line-height: 1.2;
-  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.1;
+  color: #e0e0e0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   
   @media (max-width: 768px) {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
   
   @media (max-width: 480px) {
@@ -555,7 +579,7 @@ const ControlButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   touch-action: manipulation;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 500;
   font-size: 0.9rem;
 
@@ -591,7 +615,7 @@ const GameOverlay = styled.div`
 `;
 
 const GameOverTitle = styled.h2`
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: 'Tektur', sans-serif;
   font-weight: 700;
   font-size: 2.5rem;
   color: #25dba2;
@@ -635,12 +659,12 @@ const Notification = styled.div`
   max-width: 300px;
   opacity: 0;
   transform: translateY(-20px);
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Tektur', sans-serif;
   font-weight: 400;
   font-size: 0.9rem;
   
   h4 {
-    font-family: 'Cinzel Decorative', cursive;
+    font-family: 'Tektur', sans-serif;
     font-weight: 700;
     font-size: 1rem;
     margin: 0;
@@ -679,7 +703,7 @@ const NoOrdersMessage = styled.div`
   padding: 2rem;
   
   h3 {
-    font-family: 'Cinzel Decorative', cursive;
+    font-family: 'Tektur', sans-serif;
     font-weight: 700;
     font-size: 1.5rem;
     margin-bottom: 1rem;
@@ -693,7 +717,7 @@ const NoOrdersMessage = styled.div`
   }
   
   p {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Tektur', sans-serif;
     font-weight: 400;
     font-size: 1rem;
     opacity: 0.8;
@@ -721,7 +745,7 @@ const NoOrderOverlay = styled.div`
   color: #ffffff;
   
   h2 {
-    font-family: 'Cinzel Decorative', cursive;
+    font-family: 'Tektur', sans-serif;
     font-weight: 700;
     font-size: 2rem;
     color: #25dba2;
@@ -731,7 +755,7 @@ const NoOrderOverlay = styled.div`
   }
 
   p {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Tektur', sans-serif;
     font-weight: 400;
     font-size: 1rem;
     margin-bottom: 1.5rem;
@@ -813,7 +837,7 @@ const Game = () => {
     return () => clearInterval(timer);
   }, [activeOrder, gameOver]);
 
-  // Generate new orders every 5-6 seconds with non-repeating items
+  // Generate new orders
   useEffect(() => {
     if (gameOver || orders.length >= MAX_ORDERS) return;
 
@@ -853,7 +877,7 @@ const Game = () => {
   useEffect(() => {
     const expiredOrders = orders.filter(order => order.timeLeft <= 0 && !order.completed);
     if (expiredOrders.length > 0) {
-      expiredOrders.forEach(() => playSound('defeat'));
+      expiredOrders.forEach(order => playSound('defeat'));
       setOrders(prevOrders =>
         prevOrders.map(order =>
           order.timeLeft <= 0 && !order.completed
@@ -875,8 +899,7 @@ const Game = () => {
           { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
         );
         gsap.to(element, {
-          opacity: 0,
-          y: -20,
+          opacity: 0, y: -20,
           duration: 0.5,
           ease: 'power2.in',
           delay: 3,
@@ -1126,7 +1149,7 @@ const Game = () => {
                         style={{
                           margin: '0 0 0.5rem 0',
                           fontSize: '1rem',
-                          fontFamily: "'Cinzel Decorative', cursive",
+                          fontFamily: "'Tektur', sans-serif",
                           fontWeight: '700',
                           letterSpacing: '0.05em',
                           textShadow: '0 1px 2px rgba(0,0,0,0.3)',

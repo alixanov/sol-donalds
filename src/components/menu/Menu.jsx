@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import gsap from 'gsap';
 import { ScrollTrigger, TextPlugin } from 'gsap/all';
 import { Lock as LockIcon } from '@mui/icons-material';
+import caffeBg from '../../assets/bg.jpeg';
 import soda from '../../assets/soda-art.png';
 import pumpBurger from '../../assets/PumpBurger-art.png';
 import hotDog from '../../assets/hot-dog-art.png';
@@ -17,25 +18,17 @@ gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 // Styled Components
 const GothicCafeWrapper = styled.div`
+  @import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap');
   position: relative;
   min-height: 100vh;
-  background: #0a0a0a;
+  background-image: url(${caffeBg});
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   overflow: hidden;
-  font-family: 'Cinzel Decorative', 'Times New Roman', cursive;
+  font-family: "Tektur", sans-serif;
   color: #e0e0e0;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-      radial-gradient(circle at 20% 30%, rgba(123, 31, 162, 0.15) 0%, transparent 30%),
-      radial-gradient(circle at 80% 70%, rgba(31, 162, 123, 0.15) 0%, transparent 30%);
-    z-index: 0;
-  }
 `;
 
 const SolanaParticles = styled.div`
@@ -79,7 +72,7 @@ const Header = styled.header`
 const CafeTitle = styled.h1`
   font-size: 4rem;
   margin: 0;
-  background: linear-gradient(90deg, #9945ff, #14f195);
+  background: linear-gradient(90deg,rgb(194, 145, 255),rgb(167, 255, 218));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -87,6 +80,7 @@ const CafeTitle = styled.h1`
   letter-spacing: 0.2rem;
   position: relative;
   display: inline-block;
+  font-family: "Tektur", sans-serif;
 
   &::after {
     content: '';
@@ -95,7 +89,7 @@ const CafeTitle = styled.h1`
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, #9945ff, #14f195);
+    background: linear-gradient(90deg, #9945ff,rgb(109, 255, 194));
     border-radius: 3px;
   }
 
@@ -108,8 +102,9 @@ const CafeSubtitle = styled.h2`
   font-size: 1.5rem;
   font-weight: normal;
   margin: 1rem 0 0;
-  color: #aaa;
+  color:rgb(215, 182, 255);
   font-style: italic;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
@@ -139,8 +134,8 @@ const LoadingPlaceholder = styled.div`
   text-align: center;
   padding: 2rem;
   color: #aaa;
-  font-family: 'Roboto', sans-serif;
   font-size: 1rem;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
@@ -148,7 +143,7 @@ const LoadingPlaceholder = styled.div`
 `;
 
 const MenuItem = styled.div`
-  background: rgba(20, 20, 20, ${props => (props.locked ? '0.5' : '0.8')});
+  background: rgba(25, 35, 45, ${props => (props.locked ? '0.5' : '0.8')});
   border: 1px solid ${props => (props.locked ? '#555' : '#333')};
   border-radius: 10px;
   padding: 1.5rem;
@@ -229,7 +224,7 @@ const ItemName = styled.h3`
   font-size: 1.5rem;
   margin: 0 0 0.5rem;
   color: #e0e0e0;
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 1.2rem;
@@ -241,7 +236,7 @@ const ItemDescription = styled.p`
   margin: 0 0 1rem;
   font-size: 0.9rem;
   line-height: 1.4;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -256,7 +251,7 @@ const ItemStatus = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -267,7 +262,7 @@ const ItemTime = styled.div`
   color: #aaa;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 0.8rem;
@@ -291,7 +286,7 @@ const PriceAmount = styled.span`
   font-size: 1.3rem;
   font-weight: bold;
   color: #14f195;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     font-size: 1.1rem;
@@ -307,7 +302,7 @@ const ActionButton = styled.button`
   font-weight: bold;
   cursor: ${props => props.locked ? 'not-allowed' : 'pointer'};
   transition: all 0.3s ease;
-  font-family: 'Cinzel Decorative', cursive;
+  font-family: "Tektur", sans-serif;
   min-height: 48px;
 
   &:hover {
@@ -330,9 +325,9 @@ const Footer = styled.footer`
   padding: 2rem 0;
   margin-top: 3rem;
   border-top: 1px solid #333;
-  color: #666;
+  color:rgb(220, 192, 255);
   font-size: 0.9rem;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 
   @media (max-width: 768px) {
     padding: 1rem 0;
@@ -348,7 +343,7 @@ const SolanaLogo = styled.div`
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Tektur", sans-serif;
 `;
 
 // Menu data with ingredients
@@ -439,14 +434,13 @@ const initializeOrders = () => {
 
 const SolDonalds = () => {
   const wrapperRef = useRef(null);
-  // Исправление: инициализируем массив правильно
   const menuItemRefs = useRef([]);
   const particlesRef = useRef([]);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Инициализация заказов после монтирования компонента
+  // Initialize orders
   useEffect(() => {
     try {
       const initialOrders = initializeOrders();
@@ -487,18 +481,6 @@ const SolDonalds = () => {
   useEffect(() => {
     if (!isLoaded) return;
 
-    if (wrapperRef.current) {
-      gsap.to(wrapperRef.current, {
-        backgroundPosition: '50% 100%',
-        scrollTrigger: {
-          trigger: wrapperRef.current,
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: true,
-        },
-      });
-    }
-
     // Animate particles
     if (Array.isArray(particlesRef.current)) {
       particlesRef.current.forEach(particle => {
@@ -537,7 +519,7 @@ const SolDonalds = () => {
       });
     }
 
-    // Исправление: проверяем что menuItemRefs.current существует и это массив
+    // Animate menu items
     if (menuItemRefs.current && Array.isArray(menuItemRefs.current)) {
       const validMenuItems = menuItemRefs.current.filter(item => item !== null && item !== undefined);
       if (validMenuItems.length > 0) {
@@ -554,7 +536,7 @@ const SolDonalds = () => {
         );
       }
     }
-  }, [isLoaded, orders]);
+  }, [isLoaded]);
 
   // Handle order action
   const handleOrderAction = (orderId) => {
@@ -579,7 +561,7 @@ const SolDonalds = () => {
     }
   };
 
-  // Проверяем что orders это массив перед рендерингом
+  // Safe orders array
   const safeOrders = Array.isArray(orders) ? orders : [];
 
   return (
@@ -617,14 +599,12 @@ const SolDonalds = () => {
         ) : (
           <MenuGrid className={isLoaded ? 'loaded' : ''}>
             {safeOrders.map((item, index) => {
-              // Дополнительная проверка что item существует
               if (!item || !item.id) return null;
 
               return (
                 <MenuItem
                   key={item.id}
                   ref={el => {
-                    // Исправление: безопасное присваивание ref
                     if (menuItemRefs.current && Array.isArray(menuItemRefs.current)) {
                       menuItemRefs.current[index] = el;
                     }
