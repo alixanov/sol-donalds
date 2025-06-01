@@ -12,6 +12,7 @@ import fomoFries from '../../assets/FOMO Fries-art.png';
 import chocolate from '../../assets/chocolate.png';
 import solanaBurgerImage from '../../assets/solanaBurgerImage.png';
 import chocolateCircle from '../../assets/chocolateCircle.png';
+import mobileBg from "../../assets/mobileBg.png"
 
 // Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, TextPlugin);
