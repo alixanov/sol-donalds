@@ -16,8 +16,8 @@ import {
 import Confetti from 'react-confetti';
 import uspex from '../../sound/успех.mp3';
 import polojitelniy from '../../sound/положителный.mp3';
-import pobeda from '../../sound/победа.mp3';
 import otrisatelney from '../../sound/отрицателный.mp3';
+import pobeda from '../../sound/победа.mp3';
 import porajeniya from '../../sound/поражения.mp3';
 import bunBottom from "../../assets/bun-bottom.png";
 import bearMeat from "../../assets/bear-meat.png";
@@ -129,7 +129,7 @@ const customers = [
 
 // Styled components
 const GameWrapper = styled.div`
-  @import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&family=UnifrakturMaguntia&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&display=swap');
   position: relative;
   width: 100%;
   height: 100vh;
@@ -137,6 +137,7 @@ const GameWrapper = styled.div`
   color: #fff;
   overflow: hidden;
   touch-action: manipulation;
+  font-family: 'Tektur', sans-serif;
 `;
 
 const GameHeader = styled.header`
@@ -175,10 +176,40 @@ const GameTitle = styled.h1`
 const GameStats = styled.div`
   display: flex;
   gap: 1rem;
+  align-items: center;
   
   @media (max-width: 768px) {
     gap: 0.5rem;
     flex-wrap: wrap;
+  }
+`;
+
+const HomeButton = styled.button`
+  background: linear-gradient(135deg, #9150fa 0%, #25dba2 100%);
+  color: #000;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Tektur', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all 0.2s ease;
+  
+  &:hover, &:active {
+    background: linear-gradient(135deg, #7d40e0 0%, #1fcb8e 100%);
+    transform: scale(1.05);
+  }
+  
+  @media (max-width: 768px) {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
   }
 `;
 
@@ -272,13 +303,16 @@ const OrderCard = styled.div`
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1rem;
-  cursor: pointer;
+  cursor: ${props => props.completed || props.failed ? 'default' : 'pointer'};
   transition: all 0.3s ease;
   touch-action: manipulation;
+  opacity: ${props => props.completed || props.failed ? 0.6 : 1};
 
   &:hover, &:active {
-    border-color: #25dba2;
-    transform: scale(1.02);
+    ${props => !(props.completed || props.failed) && `
+      border-color: #25dba2;
+      transform: scale(1.02);
+    `}
   }
   
   @media (max-width: 768px) {
@@ -297,8 +331,8 @@ const OrderTitle = styled.h3`
   margin: 0;
   font-family: 'Tektur', sans-serif;
   font-weight: 700;
-  color: ${props => props.completed ? '#25dba2' : '#fff'};
-  text-decoration: ${props => props.completed ? 'line-through' : 'none'};
+  color: ${props => props.completed || props.failed ? '#25dba2' : '#fff'};
+  text-decoration: ${props => props.completed || props.failed ? 'line-through' : 'none'};
   font-size: 1rem;
   letter-spacing: 0.05em;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -330,6 +364,7 @@ const IngredientPill = styled.div`
   font-family: 'Tektur', sans-serif;
   font-weight: 500;
   font-size: 0.7rem;
+  border: ${props => props.added ? '2px solid #25dba2' : 'none'};
   
   @media (max-width: 768px) {
     font-size: 0.6rem;
@@ -463,13 +498,6 @@ const IngredientCard = styled.div`
     transition: opacity 0.3s ease;
   }
 
-  &::after {
-    content: '';
-    position: calc(100% - 2px);
-    width: 8px;
-    height: #c0c0c0;
-    border-radius: 2px;
-  }
   &:hover, &:active {
     transform: scale(1.05);
     border-color: #9150fa;
@@ -648,7 +676,7 @@ const NotificationContainer = styled.div`
 `;
 
 const Notification = styled.div`
-  background: linear-gradient(135deg, #9150fa 0%, #25dba2 100%);
+  background: ${props => props.error ? '#f72585' : 'linear-gradient(135deg, #9150fa 0%, #25dba2 100%)'};
   color: #fff;
   padding: 1rem;
   border-radius: 8px;
@@ -786,8 +814,8 @@ const Game = () => {
   const [customer, setCustomer] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [lastOrderName, setLastOrderName] = useState(null);
   const notificationRefs = useRef([]);
+  const lastClickRef = useRef(0);
 
   // Initialize game
   useEffect(() => {
@@ -798,12 +826,13 @@ const Game = () => {
         recipe: location.state.order.ingredients,
         timeLeft: ORDER_PREP_TIME,
         completed: false,
+        failed: false,
         ingredientsAdded: [],
+        customer: customers[Math.floor(Math.random() * customers.length)],
       };
       setOrders([initialOrder]);
       setActiveOrder(initialOrder.id);
-      setLastOrderName(initialOrder.name);
-      setCustomer(customers[Math.floor(Math.random() * customers.length)]);
+      setCustomer(initialOrder.customer);
       playSound('select');
     } else {
       setOrders([]);
@@ -811,7 +840,7 @@ const Game = () => {
     }
   }, [location.state]);
 
-  // Game timer
+  // Game timer and order timer
   useEffect(() => {
     if (!activeOrder || gameOver) return;
 
@@ -826,12 +855,19 @@ const Game = () => {
         return prev - 1;
       });
 
-      setOrders(prevOrders =>
-        prevOrders.map(order => ({
-          ...order,
-          timeLeft: order.completed ? order.timeLeft : order.timeLeft - 1,
-        })),
-      );
+      setOrders(prevOrders => {
+        const allCompleted = prevOrders.every(o => o.completed || o.failed);
+        if (allCompleted && prevOrders.length > 0) {
+          setGameOver(true);
+          playSound('complete');
+          return prevOrders;
+        }
+        return prevOrders.map(order =>
+          order.id === activeOrder && !order.completed && !order.failed
+            ? { ...order, timeLeft: order.timeLeft - 1 }
+            : order
+        );
+      });
     }, 1000);
 
     return () => clearInterval(timer);
@@ -844,9 +880,8 @@ const Game = () => {
     let orderTimeout;
 
     const generateOrder = () => {
-      if (orders.length < MAX_ORDERS) {
-        const menuItems = Object.keys(recipes).filter(item => item !== lastOrderName);
-        if (menuItems.length === 0) return;
+      if (orders.length < MAX_ORDERS && (activeOrder || orders.length === 0)) {
+        const menuItems = Object.keys(recipes);
         const randomItem = menuItems[Math.floor(Math.random() * menuItems.length)];
         const newOrder = {
           id: Date.now(),
@@ -854,13 +889,14 @@ const Game = () => {
           recipe: recipes[randomItem] || [],
           timeLeft: ORDER_PREP_TIME,
           completed: false,
+          failed: false,
           ingredientsAdded: [],
+          customer: customers[Math.floor(Math.random() * customers.length)],
         };
         setOrders(prev => [...prev, newOrder]);
-        setLastOrderName(randomItem);
-        setCustomer(customers[Math.floor(Math.random() * customers.length)]);
         if (!activeOrder) {
           setActiveOrder(newOrder.id);
+          setCustomer(newOrder.customer);
         }
         playSound('success');
       }
@@ -871,20 +907,39 @@ const Game = () => {
     orderTimeout = setTimeout(generateOrder, Math.random() * 1000 + 5000);
 
     return () => clearTimeout(orderTimeout);
-  }, [gameOver, orders.length, lastOrderName, activeOrder]);
+  }, [gameOver, orders.length, activeOrder]);
 
   // Check for expired orders
   useEffect(() => {
-    const expiredOrders = orders.filter(order => order.timeLeft <= 0 && !order.completed);
+    const expiredOrders = orders.filter(order => order.timeLeft <= 0 && !order.completed && !order.failed);
     if (expiredOrders.length > 0) {
-      expiredOrders.forEach(order => playSound('defeat'));
+      expiredOrders.forEach(order => {
+        playSound('defeat');
+        addNotification(`Order ${order.name} expired!`);
+      });
       setOrders(prevOrders =>
         prevOrders.map(order =>
-          order.timeLeft <= 0 && !order.completed
-            ? { ...order, completed: true, failed: true }
-            : order,
+          order.timeLeft <= 0 && !order.completed && !order.failed
+            ? { ...order, failed: true }
+            : order
         )
       );
+      if (activeOrder && expiredOrders.some(o => o.id === activeOrder)) {
+        const nextOrder = orders.find(o => !o.completed && !o.failed);
+        setActiveOrder(nextOrder?.id || null);
+        setCustomer(nextOrder?.customer || null);
+      }
+    }
+  }, [orders, activeOrder]);
+
+  // Clear completed/failed orders
+  useEffect(() => {
+    const completedOrders = orders.filter(o => o.completed || o.failed);
+    if (completedOrders.length > 0) {
+      const timeout = setTimeout(() => {
+        setOrders(prev => prev.filter(o => !o.completed && !o.failed));
+      }, 3000);
+      return () => clearTimeout(timeout);
     }
   }, [orders]);
 
@@ -925,15 +980,16 @@ const Game = () => {
   // Validate activeOrder
   useEffect(() => {
     if (activeOrder && !orders.find(o => o.id === activeOrder)) {
-      const nextOrder = orders.find(o => !o.completed);
+      const nextOrder = orders.find(o => !o.completed && !o.failed);
       setActiveOrder(nextOrder?.id || null);
+      setCustomer(nextOrder?.customer || null);
     }
   }, [orders, activeOrder]);
 
   // Add notification
-  const addNotification = message => {
+  const addNotification = (message, error = false) => {
     const id = Date.now();
-    setNotifications(prev => [...prev, { id, message }]);
+    setNotifications(prev => [...prev, { id, message, error }]);
   };
 
   // Restart game
@@ -947,63 +1003,83 @@ const Game = () => {
     setCustomer(null);
     setMobileMenuOpen(false);
     setNotifications([]);
-    setLastOrderName(null);
+    playSound('select');
   };
 
   // Handle ingredient click
   const handleIngredientClick = ingredient => {
     if (!activeOrder || gameOver) return;
 
-    const order = orders.find(o => o.id === activeOrder);
-    if (!order || order.completed) return;
+    const now = Date.now();
+    if (now - lastClickRef.current < 500) return; // Debounce 500ms
+    lastClickRef.current = now;
 
-    const isCorrect = order.recipe.includes(ingredient);
+    const order = orders.find(o => o.id === activeOrder);
+    if (!order || order.completed || order.failed) return;
+
+    const nextIndex = order.ingredientsAdded.length;
+    const isCorrect = order.recipe[nextIndex] === ingredient;
     const isAlreadyAdded = order.ingredientsAdded.includes(ingredient);
 
     if (isCorrect && !isAlreadyAdded) {
-      const updatedOrders = orders.map(o =>
-        o.id === activeOrder
-          ? { ...o, ingredientsAdded: [...o.ingredientsAdded, ingredient] }
-          : o,
-      );
-      setOrders(updatedOrders);
-
-      const updatedOrder = updatedOrders.find(o => o.id === activeOrder);
-      if (updatedOrder.ingredientsAdded.length === updatedOrder.recipe.length) {
-        completeOrder(updatedOrder);
-      } else {
-        playSound('success');
-      }
-    } else if (!isCorrect) {
+      setOrders(prevOrders => {
+        const updatedOrders = prevOrders.map(o =>
+          o.id === activeOrder
+            ? { ...o, ingredientsAdded: [...o.ingredientsAdded, ingredient] }
+            : o
+        );
+        const updatedOrder = updatedOrders.find(o => o.id === activeOrder);
+        if (updatedOrder && updatedOrder.ingredientsAdded.length === updatedOrder.recipe.length) {
+          completeOrder(updatedOrder);
+        } else {
+          playSound('success');
+          addNotification(`Added ${ingredient}!`);
+        }
+        return updatedOrders;
+      });
+    } else {
       setScore(prev => Math.max(0, prev - PENALTY_PER_MISTAKE));
       playSound('error');
+      addNotification(
+        isAlreadyAdded ? `${ingredient} already added!` : `Wrong ingredient!`,
+        true
+      );
     }
   };
 
   // Complete order
   const completeOrder = order => {
-    let updatedOrders;
     setOrders(prevOrders => {
-      updatedOrders = prevOrders.map(o =>
+      const updatedOrders = prevOrders.map(o =>
         o.id === order.id ? { ...o, completed: true } : o
       );
+      const nextOrder = updatedOrders.find(o => !o.completed && !o.failed);
+      setActiveOrder(nextOrder?.id || null);
+      setCustomer(nextOrder?.customer || null);
+      setScore(prev => prev + SCORE_PER_ORDER);
+      addNotification(`+${SCORE_PER_ORDER} pts for ${order.name}!`);
+      playSound('complete');
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 3000);
       return updatedOrders;
     });
-    setScore(prev => prev + SCORE_PER_ORDER);
-    addNotification(`+${SCORE_PER_ORDER} pts`);
-    playSound('complete');
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
-
-    const nextOrder = updatedOrders?.find(o => !o.completed);
-    setActiveOrder(nextOrder?.id || null);
   };
 
   // Select order
   const selectOrder = orderId => {
     if (gameOver) return;
-    setActiveOrder(orderId);
-    setMobileMenuOpen(false);
+    const order = orders.find(o => o.id === orderId);
+    if (order && !order.completed && !order.failed) {
+      setActiveOrder(orderId);
+      setCustomer(order.customer);
+      setMobileMenuOpen(false);
+      playSound('select');
+    }
+  };
+
+  // Navigate home
+  const goHome = () => {
+    navigate('/');
     playSound('select');
   };
 
@@ -1027,7 +1103,7 @@ const Game = () => {
         <NoOrderOverlay>
           <h2>No Valid Order Selected</h2>
           <p>Please select a valid order from the menu to start.</p>
-          <ControlButton primary onClick={() => navigate('/')}>
+          <ControlButton primary onClick={goHome}>
             <ArrowBackIcon />
             Back to Menu
           </ControlButton>
@@ -1040,6 +1116,9 @@ const Game = () => {
     <GameWrapper>
       <GameHeader>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <HomeButton onClick={goHome} aria-label="Go to home menu">
+            /
+          </HomeButton>
           <GameTitle>Sol-Donalds Kitchen</GameTitle>
           {activeOrder && !gameOver && (
             <MobileMenuToggle onClick={toggleMobileMenu}>
@@ -1072,7 +1151,7 @@ const Game = () => {
               <ReplayIcon />
               Play Again
             </ControlButton>
-            <ControlButton onClick={() => navigate('/')}>
+            <ControlButton onClick={goHome}>
               <ArrowBackIcon />
               Back to Menu
             </ControlButton>
@@ -1087,10 +1166,11 @@ const Game = () => {
             ref={el => (notificationRefs.current[index] = el)}
             role="alert"
             aria-live="polite"
+            error={notification.error}
           >
             <CheckCircleIcon style={{ fontSize: '1.5rem', color: '#fff' }} />
             <div>
-              <h4>Order Complete!</h4>
+              <h4>{notification.error ? 'Error!' : 'Order Update'}</h4>
               <span>{notification.message}</span>
             </div>
           </Notification>
@@ -1107,27 +1187,38 @@ const Game = () => {
               </ControlButton>
             </MobileOrdersHeader>
             <h3 style={{ display: window.innerWidth > 768 ? 'block' : 'none' }}>Orders Queue</h3>
-            {orders.map(order => (
-              <OrderCard
-                key={order.id}
-                active={activeOrder === order.id}
-                onClick={() => selectOrder(order.id)}
-              >
-                <OrderHeader>
-                  <OrderTitle completed={order.completed}>{order.name}</OrderTitle>
-                  <OrderTime warning={order.timeLeft <= 10 && !order.completed}>
-                    {formatTime(order.timeLeft)}
-                  </OrderTime>
-                </OrderHeader>
-                <OrderIngredients>
-                  {order.recipe.map(ing => (
-                    <IngredientPill key={ing} added={order.ingredientsAdded.includes(ing)}>
-                      {ing}
-                    </IngredientPill>
-                  ))}
-                </OrderIngredients>
-              </OrderCard>
-            ))}
+            {orders.length > 0 ? (
+              orders.map(order => (
+                <OrderCard
+                  key={order.id}
+                  active={activeOrder === order.id}
+                  completed={order.completed}
+                  failed={order.failed}
+                  onClick={() => selectOrder(order.id)}
+                >
+                  <OrderHeader>
+                    <OrderTitle completed={order.completed} failed={order.failed}>
+                      {order.name}
+                    </OrderTitle>
+                    <OrderTime warning={order.timeLeft <= 10 && !order.completed && !order.failed}>
+                      {formatTime(order.timeLeft)}
+                    </OrderTime>
+                  </OrderHeader>
+                  <OrderIngredients>
+                    {order.recipe.map(ing => (
+                      <IngredientPill key={ing} added={order.ingredientsAdded.includes(ing)}>
+                        {ing}
+                      </IngredientPill>
+                    ))}
+                  </OrderIngredients>
+                </OrderCard>
+              ))
+            ) : (
+              <NoOrdersMessage>
+                <h3>No Orders</h3>
+                <p>Waiting for new orders...</p>
+              </NoOrdersMessage>
+            )}
           </OrdersColumn>
 
           <WorkArea>
@@ -1158,11 +1249,11 @@ const Game = () => {
                         Current: {orders.find(o => o.id === activeOrder)?.name}
                       </h4>
                       <OrderProgress>
-                        {allIngredients.map(ing => (
+                        {orders.find(o => o.id === activeOrder)?.recipe.map(ing => (
                           <IngredientPill
                             key={ing}
                             added={orders.find(o => o.id === activeOrder)?.ingredientsAdded.includes(ing)}
-                            required={orders.find(o => o.id === activeOrder)?.recipe.includes(ing)}
+                            required={true}
                           >
                             {ing}
                           </IngredientPill>
@@ -1199,8 +1290,7 @@ const Game = () => {
             ) : (
               <NoOrdersMessage>
                 <h3>No Active Orders</h3>
-                <p>Select an order from the queue to start.</p>
-                {orders.length === 0 && <p>Waiting for new orders...</p>}
+                <p>Waiting for new orders...</p>
               </NoOrdersMessage>
             )}
           </WorkArea>
@@ -1219,7 +1309,7 @@ const Game = () => {
 
       {activeOrder && !gameOver && (
         <GameControls>
-          <ControlButton onClick={() => navigate('/')}>
+          <ControlButton onClick={goHome}>
             <ArrowBackIcon />
             Exit
           </ControlButton>
