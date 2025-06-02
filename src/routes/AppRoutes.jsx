@@ -125,7 +125,7 @@ const AppRoutes = () => {
   return (
     <AppWrapper>
       <Suspense fallback={<Loading />}>
-        <Routes>
+        <Routes basename={"/"} >
           <Route path="/" element={<Menu />} />
           <Route path="/game" element={<Game />} />
           <Route path="*" element={<NotFound />} />
