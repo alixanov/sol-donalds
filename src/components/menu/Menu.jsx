@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import caffeBg from '../../assets/bg.jpeg';
+import caffeBg from '../../assets/bg.png';
 import XIcon from '@mui/icons-material/X';
 
 // Styled Components
