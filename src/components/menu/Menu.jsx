@@ -218,7 +218,7 @@ const SolDonalds = () => {
   const navigate = useNavigate();
 
   const handleCookClick = () => navigate('/game');
-  const handleFollowClick = () => window.open('https://twitter.com/yourhandle', '_blank');
+  const handleFollowClick = () => window.open('https://x.com/sol_donalds', '_blank');
 
   return (
     <GothicCafeWrapper>
@@ -230,7 +230,7 @@ const SolDonalds = () => {
         </Header>
 
         <WelcomeSection>
-          <WelcomeTitle>Welcome to Our Site</WelcomeTitle>
+          <WelcomeTitle>Welcome to our SOL KITCHEN</WelcomeTitle>
           <WelcomeDescription>
             Dive into the sizzling world of Sol-Donalds Kitchen, where you become the chef in a high-speed, crypto-fueled fast-food adventure! Cook up Sol-Burgers, whip up Blockchain Fries, and serve customers with lightning-fast precision.
           </WelcomeDescription>
